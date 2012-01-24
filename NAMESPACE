@@ -1,0 +1,2 @@
+useDynLib(chifit)
+exportPattern("^[[:alpha:]]+")
