@@ -1,12 +1,13 @@
 Package: chifit
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Fitting Routines for lattice data
+Version: 0.1
 Date: 2011-12-07
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What Licence is it under ?
+Author: Andreas Nube
+Maintainer: Andreas Nube <annube@ifh.de>
+Description: coming in the future
+License: GPL (>= 2)
 LazyLoad: yes
+LazyData: yes
 Depends: Rcpp (>= 0.9.6)
 LinkingTo: Rcpp

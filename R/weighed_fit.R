@@ -75,7 +75,7 @@ wlm <- function(x,y,dy=NULL,C=NULL){
 
 
   return(list(dbeta=dBetaw,beta=Beta,
-              x=as.matrix(x)[,1],y=y,dy=dy,
+              x=as.matrix(x),y=y,dy=dy,
               predict = yh,
               dof=dof,
               dpredict = sqrt( (X^2) %*% (dBetaw^2) ),

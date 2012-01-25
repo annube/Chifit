@@ -7,15 +7,10 @@
 library(hadron)
 
 
-# load some helper scripts
-scriptdir="/afs/ifh.de/user/a/annube/andreas/ETMC/analysis/R"
-
-if(! file.exists(scriptdir) ) {
-  scriptdir=as.character(Sys.getenv("OS_ANA_SCRIPT_DIR") )
-}
+## partitions <- read.table("partitions.csv",header=TRUE)
 
 
-partitions <- read.table(paste(scriptdir,"/","partitions.csv",sep=""),header=TRUE)
+data(partitions)
 
 
 g.tilde<- function(lambda,partitions,maxN=20)  {
