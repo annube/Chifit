@@ -299,7 +299,7 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
 }
 
 
-plot.wnlls <- function(res,use.col=1,...){
+plot.wnlls <- function(res,use.col=1,x.data = NULL,...){
 
 
 ##  attach(res)
@@ -310,6 +310,10 @@ plot.wnlls <- function(res,use.col=1,...){
     x= res$x[,use.col]
   else
     x = res$x
+
+  if( !missing(x.data) ){
+    x = x.data
+  }
   
   plotwitherror(x,res$y,res$dy,...)
 
