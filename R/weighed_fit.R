@@ -318,7 +318,7 @@ plot.wnlls <- function(res,use.col=1,x.data = NULL,...){
   plotwitherror(x,res$y,res$dy,...)
 
   
-  plotwitherror(x[res$range],res$y[res$range],res$dy[res$range],rep=TRUE,col="green",...)
+  plotwitherror(x[res$range],res$y[res$range],res$dy[res$range],rep=TRUE,col="green")
 
   
   
