@@ -66,3 +66,14 @@ chisqr_check <- function(data,f,...,conf=0.95,doplot=FALSE){
   res <- f(data,...,doplot=doplot)
   return( pchisq(res$chisqr,df=res$dof) < conf )
 }
+
+
+## direct checking routines
+
+## normal distribution
+chisqr_check_norm <- function( data , ...){
+  return(
+         chisqr_check(data,chisqr_norm,...)
+         )
+  
+}
