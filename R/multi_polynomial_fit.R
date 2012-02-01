@@ -107,6 +107,36 @@ dpoly2d_ndeg <- function(par,data_x,maxdeg=2){
 }
 
 
+dpoly2d_ndeg_dxy<- function(par,data_x,maxdeg=2){
+
+  attach(data_x)
+  
+  n_points=length(xvs)
+
+  resultdx <- numeric(n_points)
+  resultdy <- numeric(n_points)
+
+  
+  count = 1
+  for( i in 0:maxdeg) {  
+    for( j in 0:i)  {
+      
+      if( i-j > 0 )
+        resultdx=resultdx + par[count]*(i-j)*xvs^(i-j-1)*yvs^(j)
+      
+      if( j > 0 )
+        resultdy=resultdy + par[count]*xvs^(i-j)*j*yvs^(j-1)
+      
+      count = count + 1
+    }
+  }
+  
+  detach(data_x)
+
+  return(cbind(resultdx,resultdy))
+}
+
+
 
 fit_poly2d <-function( data_x,data_y,data_dy,degree=2,cache=NULL,...){
 
