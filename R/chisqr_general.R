@@ -29,8 +29,8 @@ chisqr_genral <- function (hist,f,doplot=FALSE){
 }
 
 
-chisqr_norm <- function(data,doplot=FALSE){
-  hist.res <- hist(data,plot=FALSE)
+chisqr_norm <- function( data, doplot=FALSE, ... ){
+  hist.res <- hist(data,plot=FALSE,...)
   ch.res <- chisqr_genral(hist.res, function(x) pnorm(x,mean=mean(data),sd=sd(data)),doplot )
 
   return( list( chisqr= ch.res$chisqr , dof = ch.res$n.intervals - 2 ) )
