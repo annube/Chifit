@@ -438,8 +438,8 @@ plotwitherror_dx <- function(x, dx , y, dy,xlim ,ylim, rep=FALSE, ...) {
   if(missing(xlim))   xlim=c(min(x-2*dx, na.rm = TRUE),max(x+2*dx, na.rm = TRUE))
 
   plot(x,y, xlim = xlim, ylim = ylim, ...)
-  arrows(x, y-dy, x, y+dy, length=0.01,angle=90,code=3,... )
-  arrows(x-dx, y, x+dx, y, length=0.01,angle=90,code=3,... )
+  arrows(x, y-dy, x, y+dy, length=0.01,angle=90,code=3 )
+  arrows(x-dx, y, x+dx, y, length=0.01,angle=90,code=3 )
 }
 
 plot_direct_fit <- function(fit_result,ensemble_name="YZZ.VV",meson="X"){

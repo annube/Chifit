@@ -9,7 +9,6 @@ Description: coming in the future
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
-Depends: Rcpp (>= 0.9.6)
 Depends: elliptic
 Depends: boot
-LinkingTo: Rcpp
+Depends: hadron

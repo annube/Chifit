@@ -299,7 +299,7 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
 }
 
 
-plot.wnlls <- function(res,use.col=1,x.data = NULL,...){
+plot.wnlls <- function(res,use.col=1,x.data = NULL,plot.range,...){
 
 
 ##  attach(res)
@@ -314,8 +314,11 @@ plot.wnlls <- function(res,use.col=1,x.data = NULL,...){
   if( !missing(x.data) ){
     x = x.data
   }
+
+  if(missing(plot.range))
+    plot.range = res$range
   
-  plotwitherror(x,res$y,res$dy,...)
+  plotwitherror(x[plot.range],res$y[plot.range],res$dy[plot.range],...)
 
   
   plotwitherror(x[res$range],res$y[res$range],res$dy[res$range],rep=TRUE,col="green")
@@ -324,18 +327,18 @@ plot.wnlls <- function(res,use.col=1,x.data = NULL,...){
   
   title(main=bquote(paste("Fit of " , y ) ))
 
-  x.min <- min(x)
-  x.max <- max(x)
+  x.min <- min(x[plot.range])
+  x.max <- max(x[plot.range])
 
-  lines( x,res$predict )
-  lines( x,res$predict+res$dpredict,lty="dashed" )
-  lines( x,res$predict-res$dpredict,lty="dashed" )
+  lines( x[plot.range],res$predict[plot.range] )
+  lines( x[plot.range],(res$predict+res$dpredict)[plot.range],lty="dashed" )
+  lines( x[plot.range],(res$predict-res$dpredict)[plot.range],lty="dashed" )
 ##  detach(res)
 
 
 
-  text(  0.5*(x.min+x.max), min(res$y-res$dy),  bquote(  paste ( chi^2 == .( res$Chisqr ) , "; " , dof == .(res$dof) ) ) ) 
-  text(  0.5*(x.min+x.max), max(res$y+res$dy),  bquote(  paste ( beta[1] == .( res$beta[1] ) +- .( res$dbeta[1] ),
+  text(  0.5*(x.min+x.max), min( ( res$y - res$dy ) [plot.range] ),  bquote(  paste ( chi^2 == .( res$Chisqr ) , "; " , dof == .(res$dof) ) ) ) 
+  text(  0.5*(x.min+x.max), max( ( res$y + res$dy ) [plot.range] ),  bquote(  paste ( beta[1] == .( res$beta[1] ) +- .( res$dbeta[1] ),
                                                                 "; " ,
                                                                 beta[2] == .(res$beta[2]) +- .( res$dbeta[2] )) ) )
 
