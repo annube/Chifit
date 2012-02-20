@@ -135,6 +135,7 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
 
   if ( ! is.null(C) ) {
 ##    print("trying to solve C")
+    print(C[range,range])
     W = solve(C[range,range])
     if( is.null(dy) )
       dy = sqrt(diag(C))
@@ -214,27 +215,20 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
   J=df(x[range,],beta,aargs=aargs)
 
 
-   Cw <- t(J) %*% W %*% J
-
-##  print( Cw[1,1]*Cw[2,2] - Cw[1,2]^2)
-##  print(Cw)
+  Cw <- t(J) %*% W %*% J
   
   Cwi <-  try( qr.solve(Cw,tol=1.e-20) )
-  if(inherits(Cwi,"try-error") ) {
-##    print(optim.res)
-##    Cwi <- Cw
-    return(list(beta=beta))
+  while(inherits(Cwi,"try-error") ) {
+    beta = beta+0.1*rnorm(length(beta))
+    J=df(x[range,],beta,aargs=aargs)
+    Cw <- t(J) %*% W %*% J
+    Cwi <-  try( qr.solve(Cw,tol=1.e-20) )
   }
   
    M <- Cwi %*% t(J) %*% W
 
-##   if(!is.null(C) )
-##    dbeta <- sqrt( M^2 %*% diag(C)[range] )
-##   else 
-   dbeta <- as.vector( sqrt( M^2 %*% dy[range]^2 ) )
+  dbeta <- as.vector( sqrt( M^2 %*% dy[range]^2 ) )
   
-##  msg <- sprintf("needed %d number of steps, achieved chi^2 of %e ",steps,chisqr)
-##  print(msg)
 
   Jf=df(x,beta,aargs)
 
