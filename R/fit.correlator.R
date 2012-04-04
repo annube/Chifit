@@ -99,9 +99,8 @@ determine.optimal.fit.range <- function(corr,dcorr,T,min.conf = 0.1,tmin=2,p = 0
   valid.j.index.just.chi = array(NA, dim = c(T/2+1,T/2+1)) 
 
   for( i in tmin:tmax) {
-    if( tmax >= i+4)
-      for(j in (i+4):tmax ){
-##        print(paste("i " , i," j ", j))
+    if( tmax >= i+3)
+      for(j in (i+3):tmax ){
         res <- try( make.corr.fit(corr,dcorr,T,i,j) )
         if( ! is.na(res) &  ! inherits( res,"try-error") ) {
           res.all.chisqr[i,j] = res$Chisqr
@@ -114,6 +113,7 @@ determine.optimal.fit.range <- function(corr,dcorr,T,min.conf = 0.1,tmin=2,p = 0
             valid.j.index [i,j] = j
           }
           if( chisqr.test[i,j] ) {
+##             print(paste("i " , i," j ", j))
             valid.i.index.just.chi [i,j] = i
             valid.j.index.just.chi [i,j] = j
           }

@@ -2,7 +2,7 @@
 
 
 
-chisqr_genral <- function (hist,f,doplot=FALSE){
+chisqr_genral <- function (hist,f,doplot=FALSE,...){
 
 
   n.breaks = length(hist$breaks)
@@ -17,7 +17,7 @@ chisqr_genral <- function (hist,f,doplot=FALSE){
 
   if(doplot){
     ylim = c(0,max( c( theoretical.counts,hist$counts)) )
-    plot(hist,ylim=ylim)
+    plot(hist,ylim=ylim,...)
     points(hist$mids[range],theoretical.counts[range])
     points(hist$mids[!range],theoretical.counts[!range],pch=4)
   }
@@ -54,9 +54,9 @@ chisqr_pois <- function(data,interval,n.split=100,doplot=FALSE){
   return( list( chisqr= ch.res$chisqr , dof = ch.res$n.intervals ) )
 }
 
-chisqr_chisqr <- function(data,dof,doplot=FALSE){
+chisqr_chisqr <- function(data,dof,doplot=FALSE,...){
   hist.res <- hist(data,plot=FALSE)
-  ch.res <- chisqr_genral(hist.res, function(x) pchisq(x,df=dof),doplot )
+  ch.res <- chisqr_genral(hist.res, function(x) pchisq(x,df=dof),doplot,... )
 
   return( list( chisqr= ch.res$chisqr , dof = ch.res$n.intervals ) )
 }

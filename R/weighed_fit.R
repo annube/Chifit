@@ -13,6 +13,13 @@ truncate.mat <- function(C,numev =dim(C)[1]){
 }
 
 
+diagonal.precondition.solve <- function( C ) {
+
+  D = diag( 1/ sqrt( diag( C  ) ) )
+  return(  D %*% solve(D %*% C %*% D ) %*% D )
+
+}
+
 ## weighed least squares fit with gaussian error calculation (propagation)
 wlm <- function(x,y,dy=NULL,C=NULL){
 
@@ -26,7 +33,7 @@ wlm <- function(x,y,dy=NULL,C=NULL){
   }
 
   if ( ! is.null(C) ) {
-    W = solve(C)
+    W = diagonal.precondition.solve(C)
     if( is.null(dy) ) dy <- sqrt(diag(C))
   }
   if( is.null(dy) && is.null(C) ) {
@@ -49,17 +56,14 @@ wlm <- function(x,y,dy=NULL,C=NULL){
     X <- cbind( rep(1,length(y)) )
   }
 
-#  print(dim(X))
 
   dof=len-dim(X)[2]
 
-#  print(X)
-#  print(W)
   
   Cw <- t(X) %*% W %*% X
 
   
-  Cwi <- solve(Cw)
+  Cwi <- diagonal.precondition.solve(Cw)
 
   
   Beta <-  (  Cwi %*%  (  t(X) %*% ( W  %*% y ) ) )
@@ -102,41 +106,42 @@ dexp2fn <- function(x,par){
 }
 
 
-chisqrfn <- function(par,x,y,fnctn,dfnctn,W,...){
-##  print(par)
-  r <- as.vector( y-fnctn(x,par,...) )
+chisqrfn <- function(par,x,y,fnctn,dfnctn,W){
+  r <-  as.vector( y-fnctn(x,par) ) 
   res <- sum( r * ( W %*% r ) )
-##  print(res)
   return(res)
 }
 
-dchisqrfn <- function(par,x,y,fnctn,dfnctn,W,...){
-  r <- as.vector( y-fnctn(x,par,...) )
-  df <-  dfnctn(x,par,...)
-  apply( df , 2 , function(x) -2*sum( x * ( W %*% r ) ) )
+dchisqrfn <- function(par,x,y,fnctn,dfnctn,W){
+  r <-  as.vector( y-fnctn(x,par) )
+  df <-  dfnctn(x,par)
+  apply( df , 2 , function(x) -2*sum(  x  * ( W %*% r ) ) )
 }
 
 
 ## weighed least squares fit with gaussian error calculation (propagation)
-wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",optim.method="BFGS",aargs=NULL,...){
+wnlls <- function(x.in,y,dy=NULL,C=NULL,f.in,df.in=NULL,par,range=NULL,optim.method="BFGS",optim.control=list(),aargs=NULL,optim.upper=Inf,optim.lower=-Inf){
 
   ## error_propagation weighed
 
-
+  
   x=as.matrix(x.in)
 
   if(is.null(range) )
     range=1:dim(x)[1]
 
+  D= diag(rep(1,length(range) ) )
+
+  
   if( ! is.null(dy) ){  
     w <- 1/dy[range]^2
     W <- diag(w)
   }
 
   if ( ! is.null(C) ) {
-##    print("trying to solve C")
-    print(C[range,range])
-    W = solve(C[range,range])
+    
+    W = diagonal.precondition.solve(C[range,range] )
+    
     if( is.null(dy) )
       dy = sqrt(diag(C))
   }
@@ -146,48 +151,50 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
   }
 
 
+   if( !missing(aargs) ){
+     f = function(x,par) f.in(x,par,aargs=aargs)
+     if( !is.null( df.in ) ){
+       df = function(x,par) df.in(x,par,aargs=aargs)
+     } else {
+       df =NULL
+     }
+     
+   } else {
+     f=f.in
+     df=df.in
+   }
+  
 
-
-  if(is.null(df)) {
-    method="optim"
-##    library(maxLik)
-##    df=function(x,par,aargs) numericGradient(function(x_)  f(x,x_,aargs) ,t0=par,eps=1.e-10  )
-  }
 
 ## do solution
-  if( method == "mycg" && !is.null(df) ){
-    print("starting mycg optimisation")
-    optim.res <- mycg(par,x[range,],y[range],f,df,W,tol=1.e-10,maxsteps=100,...)
-    print("finished: mycg optimisation")
-    beta=optim.res$beta
-    num.it=optim.res$num.it
-    betahist=optim.res$betahist
-  } else {
     
-    if(is.null(df))
-      grad=NULL
-    else
-      grad=dchisqrfn
-    
+  if(is.null(df))
+    grad=NULL
+  else
+    grad=dchisqrfn
+
+
     optim.res <- optim(par,chisqrfn,
                        gr=grad,
-                       x=x[range,],y=y[range],W=W,fnctn=f,dfnctn=df,aargs=aargs,...,method=optim.method
-                       )
+                       x=x[range,],y=y[range],W=W,fnctn=f,dfnctn=df,
+                       method=optim.method,
+                       control=optim.control,
+                       lower=optim.lower,
+                       upper=optim.upper
+                     )
+  
 
 
-
-    beta = optim.res$par
-##    print(beta)
-    num.it = 1
-    betahist=beta
-  }
+  beta = optim.res$par
+  num.it = 1
+  betahist=beta
 
   
-  delta.y=as.vector( y[range] - f(x[range,],beta,aargs=aargs) )
-  chisqr <- sum ( ( W %*% delta.y ) * delta.y )
+  delta.y=as.vector( y[range] - f(x[range,],beta) )
+  chisqr <- sum ( (  W %*%  delta.y ) * delta.y )
 
   ## calculate prediction of the model and error of it
-  predict=as.vector( f(x,beta,aargs=aargs) )
+  predict=as.vector( f(x,beta) )
 
   dof <- length(range) - length(beta)
   fit.consistend.chisq <- ( chisqr < qchisq(0.95,df=dof) )
@@ -212,25 +219,30 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
     return(res)
   }
   
-  J=df(x[range,],beta,aargs=aargs)
+  J=df(x[range,],beta)
 
 
   Cw <- t(J) %*% W %*% J
+
+
   
-  Cwi <-  try( qr.solve(Cw,tol=1.e-20) )
-  while(inherits(Cwi,"try-error") ) {
-    beta = beta+0.1*rnorm(length(beta))
-    J=df(x[range,],beta,aargs=aargs)
-    Cw <- t(J) %*% W %*% J
-    Cwi <-  try( qr.solve(Cw,tol=1.e-20) )
-  }
+##   Cwi <-  try( qr.solve(Cw,tol=1.e-20) )
+##   while(inherits(Cwi,"try-error") ) {
+##     beta = beta+0.1*beta*rnorm(length(beta))
+##     J=df(x[range,],beta)
+##     Cw <- t(J) %*% W %*% J
+##     Cwi <-  try( qr.solve(Cw,tol=1.e-20) )
+##   }
+
+
+  Cwi <- diagonal.precondition.solve(Cw)
   
    M <- Cwi %*% t(J) %*% W
 
   dbeta <- as.vector( sqrt( M^2 %*% dy[range]^2 ) )
   
 
-  Jf=df(x,beta,aargs)
+  Jf=df(x,beta)
 
 
   ## calculate prediction of the model and error of it
@@ -251,12 +263,12 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
     incbeta[betai] <- 2*dbeta[betai]
     
     rel.lin.approx.error.pos <- as.vector(
-                                          f(x[range,],beta+incbeta,aargs=aargs)
-                                          - ( f(x[range,],beta,aargs=aargs) + ( J %*% incbeta ) )
+                                          f(x[range,],beta+incbeta)
+                                          - ( f(x[range,],beta) + ( J %*% incbeta ) )
                                           ) /y[range]
     rel.lin.approx.error.neg <- as.vector(
-                                          f(x[range,],beta-incbeta,aargs=aargs)
-                                          - ( f(x[range,],beta,aargs=aargs) - ( J %*% incbeta ) )
+                                          f(x[range,],beta-incbeta)
+                                          - ( f(x[range,],beta) - ( J %*% incbeta ) )
                                           ) /y[range]
 
     ## we allow violations of the linearity up to 1%
@@ -272,7 +284,7 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
                x=x,y=y,dy=dy,C=C,f=f,df=df,par=par,range=range,
                ##
                beta=beta,dbeta=dbeta,betahist = betahist,
-               predict=f(x,beta,aargs=aargs),
+               predict=f(x,beta),
                dpredict=sqrt( (Jf^2) %*% (dbeta^2) ),
                ##
                num.it = num.it,
@@ -293,7 +305,7 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f,df=NULL,par,range=NULL,method="optim",
 }
 
 
-plot.wnlls <- function(res,use.col=1,x.data = NULL,plot.range,...){
+plot.wnlls <- function(res,use.col=1,x.data = NULL,plot.range,line.ranges=list(), plot.predict.error=TRUE, ...){
 
 
 ##  attach(res)
@@ -318,23 +330,46 @@ plot.wnlls <- function(res,use.col=1,x.data = NULL,plot.range,...){
   plotwitherror(x[res$range],res$y[res$range],res$dy[res$range],rep=TRUE,col="green")
 
   
+
+  args <- list(...)
   
-  title(main=bquote(paste("Fit of " , y ) ))
+  if( is.null( args$main ) )
+    title(main=bquote(paste("Fit of " , y ) ))
 
   x.min <- min(x[plot.range])
   x.max <- max(x[plot.range])
 
-  lines( x[plot.range],res$predict[plot.range] )
-  lines( x[plot.range],(res$predict+res$dpredict)[plot.range],lty="dashed" )
-  lines( x[plot.range],(res$predict-res$dpredict)[plot.range],lty="dashed" )
+  if( missing(line.ranges) ){
+    line.ranges[[1]] = plot.range
+  }
+
+  for( i in 1:length(line.ranges) ){
+    lines( x[line.ranges[[i]] ],res$predict[line.ranges[[i]] ] )
+    if(plot.predict.error){
+      lines( x[line.ranges[[i]] ],(res$predict+res$dpredict)[ line.ranges[[i]] ],lty="dashed" )
+      lines( x[line.ranges[[i]] ],(res$predict-res$dpredict)[ line.ranges[[i]] ] ,lty="dashed" )
+    }
+  }
+  
 ##  detach(res)
 
 
 
   text(  0.5*(x.min+x.max), min( ( res$y - res$dy ) [plot.range] ),  bquote(  paste ( chi^2 == .( res$Chisqr ) , "; " , dof == .(res$dof) ) ) ) 
-  text(  0.5*(x.min+x.max), max( ( res$y + res$dy ) [plot.range] ),  bquote(  paste ( beta[1] == .( res$beta[1] ) +- .( res$dbeta[1] ),
-                                                                "; " ,
-                                                                beta[2] == .(res$beta[2]) +- .( res$dbeta[2] )) ) )
+  text(
+       0.5*(x.min+x.max), max( ( res$y + res$dy ) [plot.range] ),
+       bquote(  paste (
+                       beta[1] == .( res$beta[1] ),
+                       "; " ,
+                       beta[2] == .(res$beta[2]) ,
+                       "; " ,
+                       beta[3] == .(res$beta[3]) 
+       ))
+       )
+  
+##  text(  0.5*(x.min+x.max), max( ( res$y + res$dy ) [plot.range] ),  bquote(  paste ( beta[1] == .( res$beta[1] ) +- .( res$dbeta[1] ),
+##                                                                "; " ,
+##                                                                beta[2] == .(res$beta[2]) +- .( res$dbeta[2] )) ) )
 
   
 }
