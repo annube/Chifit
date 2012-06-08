@@ -202,7 +202,7 @@ fit_multilinear_function<-function( data_x,data_y,data_dy,fn,dfn,npars,...,cache
   
   attach(cache)
 
-#  print(dim(W))
+##  print(dim(W))
   
   # perform linear regression
   lm_fit <- lm(as.vector(data_y)~W+0,weights=1/data_dy^2)

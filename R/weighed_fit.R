@@ -120,7 +120,7 @@ dchisqrfn <- function(par,x,y,fnctn,dfnctn,W){
 
 
 ## weighed least squares fit with gaussian error calculation (propagation)
-wnlls <- function(x.in,y,dy=NULL,C=NULL,f.in,df.in=NULL,par,range=NULL,optim.method="BFGS",optim.control=list(),aargs=NULL,optim.upper=Inf,optim.lower=-Inf){
+wnlls <- function(x.in,y,dy=NULL,C=NULL,f.in,df.in=NULL,par,range=NULL,optim.method="BFGS",optim.control=list(),aargs=NULL,optim.upper=Inf,optim.lower=-Inf,calc.dpredict=TRUE){
 
   ## error_propagation weighed
 
@@ -242,11 +242,15 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f.in,df.in=NULL,par,range=NULL,optim.met
   dbeta <- as.vector( sqrt( M^2 %*% dy[range]^2 ) )
   
 
-  Jf=df(x,beta)
-
-
-  ## calculate prediction of the model and error of it
-  dpredict=as.vector( sqrt( (Jf^2) %*% (dbeta^2) ) )
+  if( calc.dpredict ){
+    Jf=df(x,beta)
+    ## calculate prediction of the model and error of it
+    dpredict=as.vector( sqrt( (Jf^2) %*% (dbeta^2) ) )
+  } else {
+    dpredict=rep(0,length(predict))
+  }
+  
+    
   
   ## check consistency of predicted and observed data within error bounds
   
@@ -285,7 +289,7 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f.in,df.in=NULL,par,range=NULL,optim.met
                ##
                beta=beta,dbeta=dbeta,betahist = betahist,
                predict=f(x,beta),
-               dpredict=sqrt( (Jf^2) %*% (dbeta^2) ),
+               dpredict=dpredict,
                ##
                num.it = num.it,
                Chisqr = chisqr,

@@ -437,9 +437,14 @@ plotwitherror_dx <- function(x, dx , y, dy,xlim ,ylim, rep=FALSE, ...) {
   if(missing(ylim))   ylim=c(min(y-2*dy, na.rm = TRUE),max(y+2*dy, na.rm = TRUE))
   if(missing(xlim))   xlim=c(min(x-2*dx, na.rm = TRUE),max(x+2*dx, na.rm = TRUE))
 
-  plot(x,y, xlim = xlim, ylim = ylim, ...)
-  arrows(x, y-dy, x, y+dy, length=0.01,angle=90,code=3 )
-  arrows(x-dx, y, x+dx, y, length=0.01,angle=90,code=3 )
+  if(!rep){
+    plot(x,y, xlim = xlim, ylim = ylim,...)
+  } else {
+    points(x,y, xlim = xlim, ylim = ylim,...)
+  }
+    
+  arrows(x, y-dy, x, y+dy, length=0.02,angle=90,code=3,... )
+  arrows(x-dx, y, x+dx, y, length=0.02,angle=90,code=3,... )
 }
 
 plot_direct_fit <- function(fit_result,ensemble_name="YZZ.VV",meson="X"){
