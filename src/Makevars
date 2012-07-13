@@ -1,0 +1,2 @@
+PKG_LIBS = -lginac `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"`
+PKG_FLAGS=-O3 -Wall

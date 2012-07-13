@@ -4,6 +4,9 @@
 make_hr_quantity <- function(q,dq,min_err=5,num_digits) {
 
 
+  if( is.na(q) || is.na(dq) )
+    return(sprintf("NA(NA)"))
+  
   if( missing(num_digits) && ! is.na(dq) && ! is.null(dq) ) {
     if( abs(dq) < 1.e-6) {
       num_digits = 2

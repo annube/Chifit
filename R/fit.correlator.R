@@ -10,12 +10,20 @@ dcosh.R <- function(par,t,T) {
 }
 
 
-fit.cosh.approx <- function(corr,dcorr,range,T){
+fit.cosh.approx <- function(corr,dcorr,range,T,x0){
   res = numeric(length(range)-1)
   for( i in 1:(length(range)-1) ){
     t = (0:(T/2))[range[i]]
     R = corr[range[i]]/corr[range[i+1]]
-    res[i] <- newton(function(x,...) cosh.R(x,...) - R , function(x,...) dcosh.R(x,...) ,1,t=t,T=T)
+    start = 1
+    if( !missing(x0) ){
+      if(length(x0)>1){
+        start = x0[i]
+      }   else {
+        start = x0
+      }
+    }
+    res[i] <- newton(function(x,...) cosh.R(x,...) - R , function(x,...) dcosh.R(x,...) ,start,t=t,T=T)
   }
   return(res);
 }
