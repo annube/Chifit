@@ -43,7 +43,8 @@ determine.xi.IV <- function(xi.FV,C){
   res <- numeric(length(xi.FV))
 
   for( i in 1:length(res) )
-    res[i] <- newton_raphson(xI[i],function(x) xi.FV_fn(x,C)-xi.FV[i], function(x) dxi.FV_fn(x,C),100,tol=1.e-10)$root
+##    res[i] <- newton_raphson(xI[i],function(x) xi.FV_fn(x,C[i])-xi.FV[i], function(x) dxi.FV_fn(x,C[i]),100,tol=1.e-10)$root
+    res[i] <- uniroot(function(x) xi.FV_fn(x,C[i])-xi.FV[i] , c(0.5*xi.FV[i] , 2 *xi.FV[i]),tol=1.e-5)$root
   
   return(res)
   

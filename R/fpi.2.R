@@ -198,7 +198,8 @@ fpi.2.determine.a <- function(b,af0){
   f <- function(a) a * f.pi.exp - af0 * ( 1 - 2 * a^2 * C * log( a^2 * C ) + b * a^2 * C )
   df <- function(a) f.pi.exp - af0 * (  - 4 * a * C * ( log( a^2 * C ) + 1 ) + 2 * a * C * b )
   
-  nr.res <- newton_raphson(0.00038,f, df ,100,tol=1.e-10)
+  ##nr.res <- newton_raphson(0.00038,f, df ,100,tol=1.e-10)
+  nr.res <- uniroot(f, c(0.0001,0.0005) ,tol=1.e-10)
 ##  print(paste(" number of newton iterations : " , nr.res$iter ))
     return(
            nr.res$root

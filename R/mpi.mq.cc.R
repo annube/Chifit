@@ -5,6 +5,6 @@ mpi.mq.cc <- function(par,x,aargs){
 }
 
 
-dmpi.mq.cc <- function(par,x){
-  .Call("dmpi_mq",par,x,PACKAGE="chifit")
+dmpi.mq.cc <- function(par,x,aargs){
+  .Call("dmpi_mq",par,x,aargs,PACKAGE="chifit")
 }
