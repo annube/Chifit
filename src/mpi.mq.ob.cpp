@@ -7,26 +7,28 @@
 #include <vector>
 
 using namespace std;
-
 using namespace GiNaC;
-
 
 
 #include "common.h"
 
 
-ex chi_mu = 2*B0*amu_q/a; 
+symbol CMpm("C_{M^\\pm}");
 
 
-ex ampisq = pow(a , 2) * chi_mu * ( 1 
-				    + pow(a,  2) * chi_mu / pow( 4 * Pi * a * f , 2 )  * log( pow(a,2)*chi_mu / pow( a * Lambda3,2) ) 
-			       )  ;
+ex Mpm_sq = 2*B0*amu_q/a; 
+ex M0_sq = 2*B0*amu_q/a; 
+
+
+ex mpisq = Mpm_sq * ( 1 
+		      + M0_sq / 2 / pow( 4 * Pi * f , 2 )  * log( M0_sq / pow(Lambda3,2) ) 
+		      + CMpm * pow( a , 2) )  ;
 
 
 typedef map< string  , vector<double> > AargsType;
 
 
-RcppExport SEXP mpi_mq(SEXP x, SEXP par,SEXP aargs) {
+RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
 
   /* convert SEXP's to useful Rcpp objects */
    Rcpp::NumericVector vpar(par);
@@ -40,15 +42,16 @@ RcppExport SEXP mpi_mq(SEXP x, SEXP par,SEXP aargs) {
    map[B0] = vpar[0];
    map[f] = vpar[1];
    map[Lambda3] = vpar[2];
+   map[CMpm] = vpar[3];
 
    /* apply the map to the expression */
-   ex ampisq_num_eval = evalf( ampisq.subs( map ) );
+   ex mpisq_num_eval = evalf( mpisq.subs( map ) );
 
 
    /* apply for each value of the vx array and a to the expression and store result in vres*/
    for(int i = 0; i< vx.size() ; i++){
      vres[i] = ex_to<numeric>( 
-			      ampisq_num_eval.subs( lst( amu_q == vx[i] ,
+			      mpisq_num_eval.subs( lst( amu_q == vx[i] ,
 							a == latSpac[i] )) 
 			      ) .
                       to_double();
@@ -79,7 +82,7 @@ public:
 typedef vector<symbol*>::iterator exmapIt;
 
 
-RcppExport SEXP dmpi_mq(SEXP x, SEXP par,SEXP aargs) {
+RcppExport SEXP dmpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
 
    Rcpp::NumericVector vpar(par);
    Rcpp::NumericVector vx(x);
@@ -95,19 +98,21 @@ RcppExport SEXP dmpi_mq(SEXP x, SEXP par,SEXP aargs) {
    map[B0] = vpar[0];
    map[f] = vpar[1];
    map[Lambda3] = vpar[2];
+   map[CMpm] = vpar[3];
 
    vector<symbol*> parvec;
    parvec.push_back(&B0);
    parvec.push_back(&f);
    parvec.push_back(&Lambda3);
+   parvec.push_back(&CMpm);
 
 
 
    int jc=0;
    for( exmapIt j=parvec.begin();j!=parvec.end();j++,jc++){
 
-     ex dampisq = ampisq.diff( *(*j) , 1 );
-     ex dampisq_eval_pars = evalf( dampisq.subs( map ) );
+     ex dmpisq = mpisq.diff( *(*j) , 1 );
+     ex dmpisq_eval_pars = evalf( dmpisq.subs( map ) );
 
      //     cout << dmpisq_eval_pars << endl;
 
@@ -115,7 +120,7 @@ RcppExport SEXP dmpi_mq(SEXP x, SEXP par,SEXP aargs) {
 
        //       cout << jc << endl;
        gradRes(i,jc) =
-	 ex_to<numeric>( dampisq_eval_pars.subs( lst(
+	 ex_to<numeric>( dmpisq_eval_pars.subs( lst(
 					  amu_q == vx[i],
 					  a == latSpac[i]
 					  )
