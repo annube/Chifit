@@ -15,10 +15,10 @@ using namespace GiNaC;
 #include "common.h"
 
 
-ex chi_mu = 2*B0*amu_q/a; 
+static ex chi_mu = 2*B0*amu_q/a; 
 
 
-ex ampisq = pow(a , 2) * chi_mu * ( 1 
+static ex ampisq = pow(a , 2) * chi_mu * ( 1 
 				    + pow(a,  2) * chi_mu / pow( 4 * Pi * a * f , 2 )  * log( pow(a,2)*chi_mu / pow( a * Lambda3,2) ) 
 			       )  ;
 
@@ -76,7 +76,8 @@ public:
 };
 
 
-typedef vector<symbol*>::iterator exmapIt;
+typedef vector<const symbol*>::iterator exmapIt;
+// typedef vector<const symbol*>::const_iterator exmapCIt;
 
 
 RcppExport SEXP dmpi_mq(SEXP x, SEXP par,SEXP aargs) {
@@ -96,7 +97,7 @@ RcppExport SEXP dmpi_mq(SEXP x, SEXP par,SEXP aargs) {
    map[f] = vpar[1];
    map[Lambda3] = vpar[2];
 
-   vector<symbol*> parvec;
+   vector<const symbol*> parvec;
    parvec.push_back(&B0);
    parvec.push_back(&f);
    parvec.push_back(&Lambda3);

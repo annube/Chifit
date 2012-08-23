@@ -6,8 +6,8 @@
 
 using namespace GiNaC;
 
-const symbol &B0 = symbol("B_0");
-const symbol &f=symbol("f");
-const symbol &a=symbol("a");
-const symbol &amu_q=symbol("a\\mu_q");
-const symbol &Lambda3=symbol("\\lambda_3");
+static const symbol &B0 = symbol("B_0");
+static const symbol &f=symbol("f");
+static const symbol &a=symbol("a");
+static const symbol &amu_q=symbol("a\\mu_q");
+static const symbol &Lambda3=symbol("\\lambda_3");

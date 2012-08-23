@@ -79,7 +79,7 @@ public:
 };
 
 
-typedef vector<symbol*>::iterator exmapIt;
+typedef vector<const symbol*>::iterator exmapIt;
 
 
 RcppExport SEXP dmpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
@@ -100,7 +100,7 @@ RcppExport SEXP dmpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
    map[Lambda3] = vpar[2];
    map[CMpm] = vpar[3];
 
-   vector<symbol*> parvec;
+   vector<const symbol*> parvec;
    parvec.push_back(&B0);
    parvec.push_back(&f);
    parvec.push_back(&Lambda3);
