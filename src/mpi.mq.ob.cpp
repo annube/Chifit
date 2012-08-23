@@ -10,131 +10,138 @@ using namespace std;
 using namespace GiNaC;
 
 
-#include "common.h"
+/* we need a namespace here because the same symbols as below are defined in mpi.mq.cpp as well */
+namespace mpi_mq_ob {
+
+  symbol B0("B_0");
+  symbol f("f");
+  symbol a("a");
+  symbol amu_q("a\\mu_q");
+  symbol Lambda3("\\lambda_3");
+  symbol CMpm("C_{M^\\pm}");
 
 
-symbol CMpm("C_{M^\\pm}");
+  ex Mpm_sq = 2*B0*amu_q/a; 
+  ex M0_sq = 2*B0*amu_q/a; 
 
 
-ex Mpm_sq = 2*B0*amu_q/a; 
-ex M0_sq = 2*B0*amu_q/a; 
+  ex mpisq = Mpm_sq * ( 1 
+			+ M0_sq / 2 / pow( 4 * Pi * f , 2 )  * log( M0_sq / pow(Lambda3,2) ) 
+			+ CMpm * pow( a , 2) )  ;
 
 
-ex mpisq = Mpm_sq * ( 1 
-		      + M0_sq / 2 / pow( 4 * Pi * f , 2 )  * log( M0_sq / pow(Lambda3,2) ) 
-		      + CMpm * pow( a , 2) )  ;
+  typedef map< string  , vector<double> > AargsType;
 
 
-typedef map< string  , vector<double> > AargsType;
+  RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
+
+    /* convert SEXP's to useful Rcpp objects */
+    Rcpp::NumericVector vpar(par);
+    Rcpp::NumericVector vx(x);
+    Rcpp::NumericVector vres(vx.size());
+    Rcpp::List aargsMap ( aargs);
+    Rcpp::NumericVector latSpac = aargsMap["a"] ;
+
+    /* create a Symbol to input parameter mapping */
+    exmap map;
+    map[B0] = vpar[0];
+    map[f] = vpar[1];
+    map[Lambda3] = vpar[2];
+    map[CMpm] = vpar[3];
+
+    /* apply the map to the expression */
+    ex mpisq_num_eval = evalf( mpisq.subs( map ) );
 
 
-RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
-
-  /* convert SEXP's to useful Rcpp objects */
-   Rcpp::NumericVector vpar(par);
-   Rcpp::NumericVector vx(x);
-   Rcpp::NumericVector vres(vx.size());
-   Rcpp::List aargsMap ( aargs);
-   Rcpp::NumericVector latSpac = aargsMap["a"] ;
-
-   /* create a Symbol to input parameter mapping */
-   exmap map;
-   map[B0] = vpar[0];
-   map[f] = vpar[1];
-   map[Lambda3] = vpar[2];
-   map[CMpm] = vpar[3];
-
-   /* apply the map to the expression */
-   ex mpisq_num_eval = evalf( mpisq.subs( map ) );
+    /* apply for each value of the vx array and a to the expression and store result in vres*/
+    for(int i = 0; i< vx.size() ; i++){
+      vres[i] = ex_to<numeric>( 
+			       mpisq_num_eval.subs( lst( amu_q == vx[i] ,
+							 a == latSpac[i] )) 
+			       ) .
+	to_double();
+    }
 
 
-   /* apply for each value of the vx array and a to the expression and store result in vres*/
-   for(int i = 0; i< vx.size() ; i++){
-     vres[i] = ex_to<numeric>( 
-			      mpisq_num_eval.subs( lst( amu_q == vx[i] ,
-							a == latSpac[i] )) 
-			      ) .
-                      to_double();
-   }
+    return vres;
 
 
-   return vres;
-
-
-}
-
-
-
-template <typename T> class setSize 
-{
-
-private:
-  int size;
-
-public:
-  setSize(int n):size(n){}
-
-  void operator()( T &obj ){ obj.reserve(size); }
-
-};
-
-
-typedef vector<const symbol*>::iterator exmapIt;
-
-
-RcppExport SEXP dmpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
-
-   Rcpp::NumericVector vpar(par);
-   Rcpp::NumericVector vx(x);
-   Rcpp::List aargsMap ( aargs);
-   Rcpp::NumericVector latSpac = aargsMap["a"] ;
-
-
-   Rcpp::NumericMatrix gradRes(vx.size(),vpar.size());
-
-
-   /* create a Symbol to input parameter mapping */
-   exmap map;
-   map[B0] = vpar[0];
-   map[f] = vpar[1];
-   map[Lambda3] = vpar[2];
-   map[CMpm] = vpar[3];
-
-   vector<const symbol*> parvec;
-   parvec.push_back(&B0);
-   parvec.push_back(&f);
-   parvec.push_back(&Lambda3);
-   parvec.push_back(&CMpm);
+  }
 
 
 
-   int jc=0;
-   for( exmapIt j=parvec.begin();j!=parvec.end();j++,jc++){
+  template <typename T> class setSize 
+  {
 
-     ex dmpisq = mpisq.diff( *(*j) , 1 );
-     ex dmpisq_eval_pars = evalf( dmpisq.subs( map ) );
+  private:
+    int size;
 
-     //     cout << dmpisq_eval_pars << endl;
+  public:
+    setSize(int n):size(n){}
 
-     for(int i = 0; i< vx.size() ; i++){
+    void operator()( T &obj ){ obj.reserve(size); }
 
-       //       cout << jc << endl;
-       gradRes(i,jc) =
-	 ex_to<numeric>( dmpisq_eval_pars.subs( lst(
-					  amu_q == vx[i],
-					  a == latSpac[i]
-					  )
-				      )	 ).to_double() ;
+  };
+
+
+  typedef vector<symbol*>::iterator exmapIt;
+
+
+  RcppExport SEXP dmpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
+
+    Rcpp::NumericVector vpar(par);
+    Rcpp::NumericVector vx(x);
+    Rcpp::List aargsMap ( aargs);
+    Rcpp::NumericVector latSpac = aargsMap["a"] ;
+
+
+    Rcpp::NumericMatrix gradRes(vx.size(),vpar.size());
+
+
+    /* create a Symbol to input parameter mapping */
+    exmap map;
+    map[B0] = vpar[0];
+    map[f] = vpar[1];
+    map[Lambda3] = vpar[2];
+    map[CMpm] = vpar[3];
+
+    vector<symbol*> parvec;
+    parvec.push_back(&B0);
+    parvec.push_back(&f);
+    parvec.push_back(&Lambda3);
+    parvec.push_back(&CMpm);
+
+
+
+    int jc=0;
+    for( exmapIt j=parvec.begin();j!=parvec.end();j++,jc++){
+
+      ex dmpisq = mpisq.diff( *(*j) , 1 );
+      ex dmpisq_eval_pars = evalf( dmpisq.subs( map ) );
+
+      //     cout << dmpisq_eval_pars << endl;
+
+      for(int i = 0; i< vx.size() ; i++){
+
+	//       cout << jc << endl;
+	gradRes(i,jc) =
+	  ex_to<numeric>( dmpisq_eval_pars.subs( lst(
+						     amu_q == vx[i],
+						     a == latSpac[i]
+						     )
+						 )	 ).to_double() ;
 	      
 
-     }
+      }
 
-   }
-
-
+    }
 
 
-   return Rcpp::wrap( gradRes );
 
 
-}
+    return Rcpp::wrap( gradRes );
+
+
+  }
+
+};
