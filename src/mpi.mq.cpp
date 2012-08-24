@@ -98,35 +98,19 @@ namespace mpi_mq{
     map[f] = vpar[1];
     map[Lambda3] = vpar[2];
 
-    vector<symbol*> parvec;
-    parvec.push_back(&B0);
-    parvec.push_back(&f);
-    parvec.push_back(&Lambda3);
+    vector<symbol*> smap(3);
+    smap[0] = &B0;
+    smap[1] = &f;
+    smap[2] = &Lambda3;
+
+    //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
+    XValueMap xs;
+    xs[ amu_q ] = &vx;
+    xs[ a ] = &latSpac;
 
 
+    eval_ex_deri(ampisq,map,smap,xs,gradRes);
 
-    int jc=0;
-    for( exmapIt j=parvec.begin();j!=parvec.end();j++,jc++){
-
-      ex dampisq = ampisq.diff( *(*j) , 1 );
-      ex dampisq_eval_pars = evalf( dampisq.subs( map ) );
-
-      //     cout << dmpisq_eval_pars << endl;
-
-      for(int i = 0; i< vx.size() ; i++){
-
-	//       cout << jc << endl;
-	gradRes(i,jc) =
-	  ex_to<numeric>( dampisq_eval_pars.subs( lst(
-						      amu_q == vx[i],
-						      a == latSpac[i]
-						      )
-						  )	 ).to_double() ;
-	      
-
-      }
-
-    }
 
 
 
