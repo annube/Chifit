@@ -10,6 +10,9 @@ using namespace std;
 using namespace GiNaC;
 
 
+#include "eval.ex.h"
+
+
 /* we need a namespace here because the same symbols as below are defined in mpi.mq.cpp as well */
 namespace mpi_mq_ob {
 
@@ -49,19 +52,12 @@ namespace mpi_mq_ob {
     map[Lambda3] = vpar[2];
     map[CMpm] = vpar[3];
 
-    /* apply the map to the expression */
-    ex mpisq_num_eval = evalf( mpisq.subs( map ) );
+    //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
+    XValueMap xs;
+    xs[ amu_q ] = &vx;
+    xs[ a ] = &latSpac;
 
-
-    /* apply for each value of the vx array and a to the expression and store result in vres*/
-    for(int i = 0; i< vx.size() ; i++){
-      vres[i] = ex_to<numeric>( 
-			       mpisq_num_eval.subs( lst( amu_q == vx[i] ,
-							 a == latSpac[i] )) 
-			       ) .
-	to_double();
-    }
-
+    eval_ex(mpisq,map,xs,vres);
 
     return vres;
 
@@ -105,36 +101,20 @@ namespace mpi_mq_ob {
     map[Lambda3] = vpar[2];
     map[CMpm] = vpar[3];
 
-    vector<symbol*> parvec;
-    parvec.push_back(&B0);
-    parvec.push_back(&f);
-    parvec.push_back(&Lambda3);
-    parvec.push_back(&CMpm);
+
+    //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
+    XValueMap xs;
+    xs[ amu_q ] = &vx;
+    xs[ a ] = &latSpac;
+
+    vector<symbol*> parvec(4);
+    parvec[0] = &B0;
+    parvec[1] = &f;
+    parvec[2] = &Lambda3;
+    parvec[3] = &CMpm;
 
 
-
-    int jc=0;
-    for( exmapIt j=parvec.begin();j!=parvec.end();j++,jc++){
-
-      ex dmpisq = mpisq.diff( *(*j) , 1 );
-      ex dmpisq_eval_pars = evalf( dmpisq.subs( map ) );
-
-      //     cout << dmpisq_eval_pars << endl;
-
-      for(int i = 0; i< vx.size() ; i++){
-
-	//       cout << jc << endl;
-	gradRes(i,jc) =
-	  ex_to<numeric>( dmpisq_eval_pars.subs( lst(
-						     amu_q == vx[i],
-						     a == latSpac[i]
-						     )
-						 )	 ).to_double() ;
-	      
-
-      }
-
-    }
+    eval_ex_deri(mpisq,map,parvec,xs,gradRes);
 
 
 
