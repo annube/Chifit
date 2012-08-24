@@ -64,20 +64,6 @@ namespace mpi_mq{
 
 
 
-  template <typename T> class setSize 
-  {
-
-  private:
-    int size;
-
-  public:
-    setSize(int n):size(n){}
-
-    void operator()( T &obj ){ obj.reserve(size); }
-
-  };
-
-
   typedef vector<symbol*>::iterator exmapIt;
 
 
