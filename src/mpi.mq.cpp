@@ -11,6 +11,7 @@ using namespace std;
 using namespace GiNaC;
 
 
+#include "eval.ex.h"
 
 namespace mpi_mq{
 
@@ -46,18 +47,14 @@ namespace mpi_mq{
     map[f] = vpar[1];
     map[Lambda3] = vpar[2];
 
-    /* apply the map to the expression */
-    ex ampisq_num_eval = evalf( ampisq.subs( map ) );
+
+    //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
+    XValueMap xs;
+    xs[ amu_q ] = &vx;
+    xs[ a ] = &latSpac;
 
 
-    /* apply for each value of the vx array and a to the expression and store result in vres*/
-    for(int i = 0; i< vx.size() ; i++){
-      vres[i] = ex_to<numeric>( 
-			       ampisq_num_eval.subs( lst( amu_q == vx[i] ,
-							  a == latSpac[i] )) 
-			       ) .
-	to_double();
-    }
+    eval_ex(ampisq,map,xs,vres);
 
 
     return vres;
