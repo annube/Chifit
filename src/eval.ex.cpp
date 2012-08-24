@@ -15,7 +15,10 @@ using namespace GiNaC;
 
 /// general method for evaluating an expression for a given set of parameters (parValues) and x values (xs)
 
-void eval_ex(ex Xpress, const exmap &parValues,const map<ex,vector<double> > &xs) {
+
+typedef map<ex,vector<double> >::const_iterator XValueMapIt;
+
+void eval_ex(ex Xpress, const exmap &parValues,const map<ex,vector<double> > &xs,vector<double> &result) {
 
 
     /* apply the map to the expression */
@@ -27,26 +30,15 @@ void eval_ex(ex Xpress, const exmap &parValues,const map<ex,vector<double> > &xs
 
     for( int i =  0 ; i < nx ; i++){
       exmap xSubstMap;
-      xSubstMap[ xs.begin()->first ] = ( xs.begin()->second ) [ i ];
 
-      // -->> now evaluat Xpress_par_eval numerically with xSubstMap
+      for( XValueMapIt it=xs.begin();it != xs.end() ; it++)
+	xSubstMap[ it->first ] = ( it->second ) [ i ];
+
+      ex_to<numeric>( 
+		     Xpress_par_eval.subs( xSubstMap ) 
+		     ) .to_double();
 
     }
-    //
-    //
-
-
-
-//     for(int i = 0; i< vx.size() ; i++){
-//       vres[i] = ex_to<numeric>( 
-// 			       ampisq_num_eval.subs( lst( amu_q == vx[i] ,
-// 							  a == latSpac[i] )) 
-// 			       ) .
-// 	to_double();
-//     }
-
-
-//     return vres;
 
 
   }
