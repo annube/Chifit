@@ -1,4 +1,4 @@
-library(elliptic,pos="package:base")
+# library(elliptic,pos="package:base")
 
 
 fpi.2.calc.cache <- function(x,par,aargs) {

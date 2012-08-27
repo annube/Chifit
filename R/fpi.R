@@ -1,4 +1,4 @@
-library(elliptic,pos = "package:base")
+# library(elliptic,pos = "package:base")
 
 hbarc <- 197.6 ## MeV x fm
 
