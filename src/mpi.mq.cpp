@@ -70,6 +70,7 @@ namespace mpi_mq{
     Rcpp::NumericVector latSpac = aargsMap["a"] ;
     Rcpp::NumericVector Loa = aargsMap["L"] ;
     Rcpp::NumericVector zpVal = aargsMap["ZP"] ;
+    
 
     /* create a Symbol to input parameter mapping */
     exmap map;
