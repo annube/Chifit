@@ -12,7 +12,7 @@ using namespace GiNaC;
 
 
 #include "gtilde.h"
-#include "eval.ex.h"
+#include "eval.ex.lso.h"
 
 namespace mpi_mq_lso{
 
@@ -55,247 +55,157 @@ namespace mpi_mq_lso{
     return X;
   }
 
+
+
   RcppExport SEXP mpi_mq_lso(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
 
-
-  // pion mass
     static  ex ampisq = getampisqXpression();
 
-    /* convert SEXP's to useful Rcpp objects */
     Rcpp::NumericVector vpar(par);
     Rcpp::NumericVector vx(x);
+    int nx = vx.size();
 
-    Rcpp::NumericVector vres(vx.size());
-    Rcpp::NumericMatrix gradRes(vx.size(),vpar.size());
-    Rcpp::NumericMatrix gradRaw(vx.size(),3);
+    Rcpp::NumericVector mpires(nx);
+    Rcpp::NumericMatrix dmpires(nx,vpar.size());
 
     bool calcDeri = Rcpp::as<bool>(deri);
 
     Rcpp::List aargsMap ( aargs);
-    Rcpp::NumericVector numLs = aargsMap["numLs"] ;
+    int numLs = Rcpp::as<int>(aargsMap["numLs"]);
     Rcpp::NumericVector latSpacIndex = aargsMap["lsIndex"] ;
     Rcpp::NumericVector Loa = aargsMap["L"] ;
     Rcpp::NumericVector zpVal = aargsMap["ZP"] ;
-    
-
-    Rcpp::NumericVector af0Vals(vx.size());
-    Rcpp::NumericVector aB0Vals(vx.size());
-    Rcpp::NumericVector aLambda3Vals(vx.size());
-
-    vector<double> lsRatios(numLs[0]);
-
-    for(int j = 0 ; j < numLs[0] ; j++)
-      lsRatios[j] = vpar[ 1 + j ]/vpar[1];
-
-
-    for(int i = 0 ; i<vx.size() ; i++){
-      af0Vals[i] = vpar[latSpacIndex[i] + 0 /* R's indices start from 1 */ ];
-      aB0Vals[i] = vpar[0] * lsRatios[ latSpacIndex[i] - 1 ];
-      aLambda3Vals[i] = vpar[1 + numLs[0]] * lsRatios[ latSpacIndex[i] - 1 ];
-    }
-
-    /* create a Symbol to input parameter mapping */
-    exmap map;
 
 
 
-    //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
-    XValueMap xs;
-    xs[ af ] = &af0Vals;
-    xs[ aB0 ] = &aB0Vals;
-    xs[ aLambda3 ] = &aLambda3Vals;
-    xs[ amu_q ] = &vx;
-    xs[L] = &Loa;
-    xs[ZP] = &zpVal;
+    /// symbol for the ratio of two lattice spacings
+    symbol R("R");
+    int num_pure_parameters = vpar.size() - (numLs-1);
 
-     vector<symbol*> smap(3);
-     smap[0] = &aB0;
-     smap[1] = &af;
-     smap[2] = &aLambda3;  // <-- this is correct
+    vector<GiNaC::symbol> deriMap(4);
+    deriMap[0] = aB0;
+    deriMap[1] = af;
+    deriMap[2] = aLambda3;
+    deriMap[3] = R;
 
 
+    for(int ix=0;ix<nx;ix++){
 
-    if(calcDeri){
-      eval_ex_deri(ampisq,map,smap,xs,gradRaw);
+      /**
+       *  pseudocode:
+       *  1.) if we are not at the first lattice spacing
+       *      replace the parameters by R * the Parametere
+       *  2.) if we calculate the derivative derive Xpress.
+       *      with respect to the parameter under consideration
+       *  3.) substitute the numerical values of the parameter,
+       *      the quark mass and other values like L and ZP
+       */
 
-      for( int ix = 0 ; ix < vx.size() ; ix++){
-	for( int apar = 0 ; apar < 3 ; apar++){
-	  cout << ix << " " << apar << endl;
-	  switch ( apar ){
-	  case 0: gradRes(ix,0) = gradRaw(ix,0); break;
-	  case 1: gradRes(ix,latSpacIndex[ix]) = gradRaw(ix,1); break;
-	  case 2: gradRes(ix,1+numLs[0]) = gradRaw(ix,2); break;
 
+
+      ex X_R_subs = ampisq;
+
+      /* 1.)  substitute R * par if not first lat. spac. */
+      if( latSpacIndex[ix] > 1 ){
+	exmap R_times_par;
+	R_times_par[aB0] = R * aB0;
+	R_times_par[af] = R * af;
+	R_times_par[aLambda3] = R * aLambda3;
+	X_R_subs = ampisq.subs( R_times_par );
+      }
+
+
+      /**
+       * prepare numeric evaluation because it
+       * can be used also for the deri 
+       */
+      exmap par_numeric_vals;
+      /* parameters */
+      par_numeric_vals[aB0] = vpar[0];
+      par_numeric_vals[af] = vpar[1];
+      par_numeric_vals[aLambda3] = vpar[2];
+      par_numeric_vals[R] = vpar[3+latSpacIndex[ix]-2];
+
+      /* regressors */
+      par_numeric_vals[amu_q] = vx[ix];
+      par_numeric_vals[ZP] = zpVal[ix];
+      par_numeric_vals[L] = Loa[ix];
+
+
+
+      if( calcDeri ){
+      /* at this point we would do the derivatives */
+	// for i_par in 1 to number of parameters
+	int ipar = 0;
+ 	for( SymbolVecIt dit = deriMap.begin() ; dit != deriMap.end() ; dit++,ipar++){
+
+	  if( (*dit) == R && latSpacIndex[ix] == 1 ) continue;
+
+	  ex Xpress_deri = X_R_subs.diff( *dit ,1 );
+	  ex Xpress_num_eval = Xpress_deri.subs( par_numeric_vals ).evalf();
+
+	  if( is_a<numeric>(Xpress_num_eval) ){
+
+	    if( (*dit) == R ) {
+	      dmpires(ix,num_pure_parameters + latSpacIndex[ix]-2 ) = ex_to<numeric>( Xpress_num_eval ).to_double();
+	    } else {
+	      dmpires(ix,ipar) = ex_to<numeric>( Xpress_num_eval ).to_double();
+	    }
+	  } else {
+	    cout << Xpress_num_eval << endl;
 	  }
 	}
 
+
+
+
+      } else {
+
+	/* perform numeric avaluation */
+	ex Xpress_num_eval = X_R_subs.subs( par_numeric_vals ).evalf();
+	
+	if( is_a<numeric>(Xpress_num_eval) ){
+	  mpires[ix] = ex_to<numeric>( Xpress_num_eval ).to_double();
+	} else {
+	  cout << Xpress_num_eval << endl;
+	}
       }
 
-      return gradRes;
-    } else {
-      eval_ex(ampisq,map,xs,vres);
-      return vres;
+
     }
 
 
+      if( calcDeri )
+	return dmpires;
+      else
+	return mpires;
 
   }
 
 
+  RcppExport SEXP mpi_mq_lso_gen(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
+    static  ex ampisq = getampisqXpression();
 
-//   RcppExport SEXP dmpi_mq_lso(SEXP x, SEXP par,SEXP aargs) {
-
-//   // pion mass
-//     static  ex ampisq = getampisqXpression();
-
-//     Rcpp::NumericVector vpar(par);
-//     Rcpp::NumericVector vx(x);
-//     Rcpp::List aargsMap ( aargs);
-//     Rcpp::NumericVector latSpac = aargsMap["a"] ;
-//     Rcpp::NumericVector Loa = aargsMap["L"] ;
-//     Rcpp::NumericVector zpVal = aargsMap["ZP"] ;
+    /* the main parameters to optimize for */
+    SymbolVec pureParVec;
+    pureParVec.push_back(aB0);
+    pureParVec.push_back(af);
+    pureParVec.push_back(aLambda3);
 
 
-//     Rcpp::NumericMatrix gradRes(vx.size(),vpar.size());
+    /* additional regressors besides the main regressor */
+    SymbolStringVec ssvec;
+    ssvec.push_back( SymbolStringPair( &L , "L" ) );
+    ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+
+    return    eval_ex_lso(ampisq, /* the expression to work on */
+			  x,par,aargs,deri, /* pass on the parameters from R environment */
+			  amu_q, /* the main regressor appearing in the expression */
+			  pureParVec,  /* a vector of parameters to optimize for */
+			  ssvec   /* a vector of additional regresssor and their name in the aargs list */
+			  );
+  }
 
 
-//     /* create a Symbol to input parameter mapping */
-//     exmap map;
-//     map[B0] = vpar[0];
-//     map[f] = vpar[1];
-//     map[Lambda3] = vpar[2];
-
-//     vector<symbol*> smap(3);
-//     smap[0] = &B0;
-//     smap[1] = &f;
-//     smap[2] = &Lambda3;  // <-- this is correct
-
-//     //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
-//     XValueMap xs;
-//     xs[ amu_q ] = &vx;
-//     xs[ a ] = &latSpac;
-//     xs[ L ] = &Loa;
-//     xs[ ZP ] = &zpVal;
-
-
-//     eval_ex_deri(ampisq,map,smap,xs,gradRes);
-
-
-
-
-
-//     return Rcpp::wrap( gradRes );
-
-
-//   }
-
-
-//   /**************************
-//    *
-//    *
-//    *  PION DECAY CONSTANT
-//    *
-//    *
-//    *
-//    **************************/
-
-
-
-
-//   static ex getafpiXpression(){
-//     static ex X = a * f * ( 1 
-// 			    - 2 *  xi_ll  * log( chi_mu / pow( Lambda4,2) ) 
-// 			    )
-//       *
-//       ( 1 - 2  * xi_ll * gtilde1( sqrt(  chi_mu ) *  L * a   ) ) ;
-//     return X;
-//   }
-
-
-//   RcppExport SEXP fpi_mq_lso(SEXP x, SEXP par,SEXP aargs) {
-
-//     /* convert SEXP's to useful Rcpp objects */
-//     Rcpp::NumericVector vpar(par);
-//     Rcpp::NumericVector vx(x);
-//     Rcpp::NumericVector vres(vx.size());
-//     Rcpp::List aargsMap ( aargs);
-//     Rcpp::NumericVector latSpac = aargsMap["a"] ;
-//     Rcpp::NumericVector Loa = aargsMap["L"] ;
-//     Rcpp::NumericVector zpVal = aargsMap["ZP"] ;
-
-//     // pion decay
-//     static ex afpi = getafpiXpression();
-
-
-//     /* create a Symbol to input parameter mapping */
-//     exmap map;
-//     map[B0] = vpar[0];
-//     map[f] = vpar[1];
-//     map[Lambda4] = vpar[2];
-
-
-//     //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
-//     XValueMap xs;
-//     xs[ amu_q ] = &vx;
-//     xs[ a ] = &latSpac;
-//     xs[ L ] = &Loa;
-//     xs[ ZP ] = &zpVal;
-
-
-//     eval_ex(afpi,map,xs,vres);
-
-
-//     return vres;
-
-
-//   }
-
-
-
-//   RcppExport SEXP dfpi_mq_lso(SEXP x, SEXP par,SEXP aargs) {
-
-//     Rcpp::NumericVector vpar(par);
-//     Rcpp::NumericVector vx(x);
-//     Rcpp::List aargsMap ( aargs);
-//     Rcpp::NumericVector latSpac = aargsMap["a"] ;
-//     Rcpp::NumericVector Loa = aargsMap["L"] ;
-//     Rcpp::NumericVector zpVal = aargsMap["ZP"] ;
-
-
-//     Rcpp::NumericMatrix gradRes(vx.size(),vpar.size());
-
-
-//     // pion decay
-//     static ex afpi = getafpiXpression();
-
-//     /* create a Symbol to input parameter mapping */
-//     exmap map;
-//     map[B0] = vpar[0];
-//     map[f] = vpar[1];
-//     map[Lambda4] = vpar[2];
-
-//     vector<symbol*> smap(3);
-//     smap[0] = &B0;
-//     smap[1] = &f;
-//     smap[2] = &Lambda4;
-
-//     //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
-//     XValueMap xs;
-//     xs[ amu_q ] = &vx;
-//     xs[ a ] = &latSpac;
-//     xs[ L ] = &Loa;
-//     xs[ ZP ] = &zpVal;
-
-
-//     eval_ex_deri(afpi,map,smap,xs,gradRes);
-
-
-
-
-
-//     return Rcpp::wrap( gradRes );
-
-
-//   }
 
 };
