@@ -20,6 +20,7 @@ SEXP eval_ex_lso(
 		 ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
 		 symbol mainRegressor,
 		 SymbolVec pureParVec,
+		 vector<double> pureParDimE,
 		 SymbolStringVec addRegr
 		 ) {
 
@@ -77,8 +78,9 @@ SEXP eval_ex_lso(
 
       exmap R_times_par;
 
-      for( SymbolVecIt svit = pureParVec.begin() ; svit!=pureParVec.end() ; svit++)
-	R_times_par[ *svit ]  = (*svit) * R;
+
+      for( int pi = 0 ; pi < pureParVec.size() ; pi++)
+	R_times_par[ pureParVec[pi] ]  = pureParVec[pi] * pow( R , pureParDimE[pi] );
 
 
       X_R_subs = Xpression.subs( R_times_par );
