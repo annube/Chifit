@@ -10,8 +10,10 @@ using namespace GiNaC;
 #include "gtilde.partitions.h"
 #include "bessel.h"
 
+#include "gtilde.new.h"
 
-ex gtilde_1_new(const ex & x,int maxorder  = 20){
+
+ex gtilde1_new(const ex & x,int maxorder){
   std::vector<ex> exs;
   for( int i = 1 ; i <= maxorder ; i++){
     ex mulp = 4. * (double)getPartition(i) / ::sqrt( (double) i ) / x;
@@ -32,7 +34,7 @@ RcppExport SEXP eval_gtilde_n_R( SEXP x){
 
   symbol sx;
 
-  return Rcpp::wrap(ex_to<numeric>( gtilde_1_new(sx).subs(sx == xv).evalf()).to_double() ) ;
+  return Rcpp::wrap(ex_to<numeric>( gtilde1_new(sx).subs(sx == xv).evalf()).to_double() ) ;
 }
 
 
@@ -43,5 +45,5 @@ RcppExport SEXP eval_dgtilde_n_R( SEXP x){
 
   symbol sx;
 
-  return Rcpp::wrap(ex_to<numeric>( gtilde_1_new(sx).diff(sx).subs(sx == xv).evalf()).to_double() ) ;
+  return Rcpp::wrap(ex_to<numeric>( gtilde1_new(sx).diff(sx).subs(sx == xv).evalf()).to_double() ) ;
 }

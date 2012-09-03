@@ -12,6 +12,9 @@ using namespace GiNaC;
 
 
 #include "gtilde.h"
+
+//#include "gtilde.new.h"
+
 #include "eval.ex.lso.h"
 
 namespace mpi_mq_lso{
@@ -35,7 +38,6 @@ namespace mpi_mq_lso{
 
 
 
-
   /**************************
    *
    *
@@ -51,7 +53,7 @@ namespace mpi_mq_lso{
 					   + xi_ll  * log( chi_mu_asq / pow( aLambda3,2.) ) 
 					   + Dmps) * pow(1. + 0.5 * xi_ll * gtilde1( sqrt(
 										 chi_mu_asq ) *  L
-									       ) ,2) ;
+									       ) ,2.) ;
     return X;
   }
 
@@ -100,11 +102,11 @@ namespace mpi_mq_lso{
 
   static ex getafpiXpression(){
     static ex X = af * ( 1 
-			    - 2 *  xi_ll  * log( chi_mu_asq / pow( aLambda4,2) ) 
+			    - 2. *  xi_ll  * log( chi_mu_asq / pow( aLambda4,2) ) 
 			 + Dfps
 			    )
       *
-      ( 1 - 2  * xi_ll * gtilde1( sqrt(  chi_mu_asq ) *  L    ) ) ;
+      ( 1. - 2.  * xi_ll * gtilde1( sqrt(  chi_mu_asq ) *  L    ) ) ;
     return X;
   }
 
