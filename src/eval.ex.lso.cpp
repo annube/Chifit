@@ -83,9 +83,6 @@ SEXP eval_ex_lso(
 	R_times_par[ pureParVec[pi] ]  = pureParVec[pi] * pow( R , pureParDimE[pi] );
 
 
-      /* we assume that the main regressor has energy dimension one*/
-      R_times_par[mainRegressor] = mainRegressor * R;
-
       X_R_subs = Xpression.subs( R_times_par );
     }
 
