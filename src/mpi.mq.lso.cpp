@@ -13,8 +13,6 @@ using namespace GiNaC;
 
 #include "gtilde.h"
 
-//#include "gtilde.new.h"
-
 #include "eval.ex.lso.h"
 
 namespace mpi_mq_lso{

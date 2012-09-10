@@ -77,3 +77,6 @@ chisqr_check_norm <- function( data , ...){
          )
   
 }
+
+
+chisqr.norm.pvalue <- function(x) {res <- chisqr_norm(x); 1-pchisq(res$chisqr,df=res$dof) }
