@@ -1,4 +1,4 @@
-simple.optim <- function(x,y,dy,f,df,par0,fit.tol = 1.e-10,maxit=100,use.line.search=FALSE,use.quadratic.regression=FALSE,upd.range=NULL) {
+simple.optim <- function(x,y,dy,f,df,par0,fit.tol = 1.e-10,maxit=100,use.line.search=FALSE,use.quadratic.regression=FALSE,upd.range=NULL,verbose=FALSE) {
   par.lm <- par0
   residue <- y-f(x,par.lm)
   Chisqr.new = sum(residue^2/dy^2)
@@ -9,7 +9,7 @@ simple.optim <- function(x,y,dy,f,df,par0,fit.tol = 1.e-10,maxit=100,use.line.se
   
   it = 0
   while( abs(rel.diff)>fit.tol && it < maxit ){
-    print(paste(Chisqr.new," ",(rel.diff)))
+    if(verbose) print(paste(Chisqr.new," ",(rel.diff)))
     dff <- df(x,par.lm)
     lm.res <- lm( residue~dff[,upd.range]+0,weights=1/dy^2)
     dpar.lm = lm.res$coefficients
@@ -18,7 +18,7 @@ simple.optim <- function(x,y,dy,f,df,par0,fit.tol = 1.e-10,maxit=100,use.line.se
     if( use.line.search ){
       f.line <- function(alpha) { par.test = par.lm ; par.test[upd.range] = par.lm[upd.range] + alpha*dpar.lm ; return( sum( ( ( y-f(x,par.test) )/dy ) ^2 ) ) }
       alpha.optim <- line.search(f.line,1,0.1,1.e-3,2)
-      print(alpha.optim)
+      if(verbose) print(alpha.optim)
       par.lm[upd.range] = par.lm[upd.range] + dpar.lm*alpha.optim
     } else {
 
@@ -44,7 +44,7 @@ simple.optim <- function(x,y,dy,f,df,par0,fit.tol = 1.e-10,maxit=100,use.line.se
         falpha.optim <- sum( ( ( y-f(x,par.optim) )/dy ) ^2 )
         
         optim.index <- order(c(fx,falpha.optim))[1]
-        print(optim.index)
+        if(verbose) print(optim.index)
         par.lm[upd.range] = par.lm[upd.range] + dpar.lm*( c(alpha.test,alpha.optim)[optim.index] )
       } else {
         par.lm[upd.range] = par.lm[upd.range] + dpar.lm
