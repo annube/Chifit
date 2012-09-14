@@ -1,10 +1,11 @@
 
 
 
-lev.marq <- function( x,y,dy,fn,dfn,par.0 ){
+lev.marq <- function( x,y,dy,fn,dfn,par.0,upd.range ){
 
 
   beta = par.0
+  beta.new = beta
   lambda = 1.
   tol = 1.e-10
   nu = 2
@@ -16,16 +17,16 @@ lev.marq <- function( x,y,dy,fn,dfn,par.0 ){
   chisqr = sum( ( res/dy )^2 )
   rel.diff = 1
 
-  
+ 
   while( rel.diff > tol ){
     
     
-    X <- dfn(x,beta)
+    X <- dfn(x,beta)[,upd.range]
     rhs = t(X) %*% W %*% res
     Cw <- t(X) %*% W %*% X
     print( sprintf(" lambda = %e " ,lambda) )
     dbeta =  ( as.vector( lev.marq.solution(rhs,Cw,lambda) ) )
-    beta.new = beta + dbeta
+    beta.new[upd.range] = beta[upd.range] + dbeta
 ##    print(beta.new)
     res.new = try( y - fn(x,beta.new) )
     if( inherits( res.new , "try-error" ) || any( is.nan( res.new ) ) ) {
