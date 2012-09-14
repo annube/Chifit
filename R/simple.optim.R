@@ -13,7 +13,8 @@ simple.optim <- function(x,y,dy,f,df,par0,fit.tol = 1.e-10,maxit=100,use.line.se
     dff <- df(x,par.lm)
     lm.res <- lm( residue~dff[,upd.range]+0,weights=1/dy^2)
     dpar.lm = lm.res$coefficients
-    
+
+    dpar.lm[ is.na(dpar.lm) ] = 0
 
     if( use.line.search ){
       f.line <- function(alpha) { par.test = par.lm ; par.test[upd.range] = par.lm[upd.range] + alpha*dpar.lm ; return( sum( ( ( y-f(x,par.test) )/dy ) ^2 ) ) }

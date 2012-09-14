@@ -10,118 +10,148 @@ using namespace std;
 using namespace GiNaC;
 
 
-#include "eval.ex.h"
+#include "gtilde.h"
+
+#include "eval.ex.lso.h"
 
 
 /* we need a namespace here because the same symbols as below are defined in mpi.mq.cpp as well */
 namespace mpi_mq_ob {
 
-  symbol B0("B_0");
-  symbol f("f");
-  symbol a("a");
-  symbol amu_q("a\\mu_q");
-  symbol Lambda3("\\lambda_3");
-  symbol CMpm("C_{M^\\pm}");
+  symbol B("aB_0");
+  symbol f("af");
+  symbol mu("a\\mu_q");
+  symbol Lambda3("a\\Lambda_3");
+  symbol Lambda4("a\\Lambda_4");
+  symbol L("L");
+  symbol ZP("Z_P");
+  symbol CMpm("C_{M_{\\pm}}");
+  symbol Cf("D_{f}");
+  symbol c2("c_2");
+
+  ex Mpm_sq = 2*B*mu/ZP; 
+  ex M0_sq = sqrt( pow(  2*B*mu/ZP + 2*c2 ,2 ) ); 
 
 
-  ex Mpm_sq = 2*B0*amu_q/a; 
-  ex M0_sq = 2*B0*amu_q/a; 
+//   ex xi_pm = Mpm_sq/ pow( 4. * Pi * f , 2 );
+//   ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
 
 
-  ex mpisq = Mpm_sq * ( 1 
-			+ M0_sq / 2 / pow( 4 * Pi * f , 2 )  * log( M0_sq / pow(Lambda3,2) ) 
-			+ CMpm * pow( a , 2) )  ;
+//   ex fse_log_corr_Mpm = gtilde1( sqrt( Mpm_sq ) *  L );
+//   ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
+
+  
+//   ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 ) ) + fse_log_corr_M0 ;
+//   ex log_M0_L4 = log( M0_sq / pow( Lambda4 , 2 ) ) + fse_log_corr_M0;
+
+//   ex log_Mpm_L3 = log( Mpm_sq / pow( Lambda3 , 2 ) ) + fse_log_corr_Mpm;
+//   ex log_Mpm_L4 = log( Mpm_sq / pow( Lambda4 , 2 ) ) + fse_log_corr_Mpm;
 
 
-  typedef map< string  , vector<double> > AargsType;
+  static ex get_M_pm_sq_Xpression(){
+    static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
+    static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
+    static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_M0 ;
+
+    static ex X = (  2*B/ZP * ( 1. + xi_0 * log_M0_L3 + CMpm ) ) ; 
+    return X;
+  }
 
 
-  RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
+  static ex get_f_pm_Xpression(){
+    static ex xi_pm = Mpm_sq/ pow( 4. * Pi * f , 2 );
+    static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
+    static ex fse_log_corr_Mpm = gtilde1( sqrt( Mpm_sq ) *  L );
+    static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
+    static ex log_M0_L4 = log( M0_sq / pow( Lambda4 , 2 )  ) + fse_log_corr_M0;
+    static ex log_Mpm_L4 = log( Mpm_sq / pow( Lambda4 , 2 ) ) + fse_log_corr_Mpm;
 
-    /* convert SEXP's to useful Rcpp objects */
-    Rcpp::NumericVector vpar(par);
-    Rcpp::NumericVector vx(x);
-    Rcpp::NumericVector vres(vx.size());
-    Rcpp::List aargsMap ( aargs);
-    Rcpp::NumericVector latSpac = aargsMap["a"] ;
-
-    /* create a Symbol to input parameter mapping */
-    exmap map;
-    map[B0] = vpar[0];
-    map[f] = vpar[1];
-    map[Lambda3] = vpar[2];
-    map[CMpm] = vpar[3];
-
-    //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
-    XValueMap xs;
-    xs[ amu_q ] = &vx;
-    xs[ a ] = &latSpac;
-
-    eval_ex(mpisq,map,xs,vres);
-
-    return vres;
-
-
+    static ex X =  f * ( 1. - ( xi_pm * log_Mpm_L4 + xi_0 * log_M0_L4 ) + Cf ) ;
+    return X;
   }
 
 
 
-  template <typename T> class setSize 
-  {
 
-  private:
-    int size;
+  /**************************
+   *
+   *
+   *        PION MASS
+   *
+   *
+   *
+   **************************/
 
-  public:
-    setSize(int n):size(n){}
+  RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
+    static  ex mpisq = get_M_pm_sq_Xpression();
 
-    void operator()( T &obj ){ obj.reserve(size); }
+    /* the main parameters to optimize for */
+    SymbolVec pureParVec;
+    vector<double> pureParDimE;
 
-  };
+    /* the parameters to be fitted and their energy dimension */
 
+    pureParVec.push_back(B);       pureParDimE.push_back(1.);
+    pureParVec.push_back(f);       pureParDimE.push_back(1.);
+    pureParVec.push_back(c2);      pureParDimE.push_back(4.);
+    pureParVec.push_back(Lambda3); pureParDimE.push_back(1.);
+    pureParVec.push_back(CMpm);    pureParDimE.push_back(2.);
 
-  typedef vector<symbol*>::iterator exmapIt;
-
-
-  RcppExport SEXP dmpi_mq_ob(SEXP x, SEXP par,SEXP aargs) {
-
-    Rcpp::NumericVector vpar(par);
-    Rcpp::NumericVector vx(x);
-    Rcpp::List aargsMap ( aargs);
-    Rcpp::NumericVector latSpac = aargsMap["a"] ;
-
-
-    Rcpp::NumericMatrix gradRes(vx.size(),vpar.size());
-
-
-    /* create a Symbol to input parameter mapping */
-    exmap map;
-    map[B0] = vpar[0];
-    map[f] = vpar[1];
-    map[Lambda3] = vpar[2];
-    map[CMpm] = vpar[3];
+    
 
 
-    //void eval_ex(ex Xpress, const exmap &parValues,const XValueMap &xs,vector<double> &result);
-    XValueMap xs;
-    xs[ amu_q ] = &vx;
-    xs[ a ] = &latSpac;
+    /* additional regressors besides the main regressor */
+    SymbolStringVec ssvec;
+    ssvec.push_back( SymbolStringPair( &L , "L" ) );
+    ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
 
-    vector<symbol*> parvec(4);
-    parvec[0] = &B0;
-    parvec[1] = &f;
-    parvec[2] = &Lambda3;
-    parvec[3] = &CMpm;
-
-
-    eval_ex_deri(mpisq,map,parvec,xs,gradRes);
-
-
-
-
-    return Rcpp::wrap( gradRes );
-
-
+    return    eval_ex_lso(mpisq, /* the expression to work on */
+			  x,par,aargs,deri, /* pass on the parameters from R environment */
+			  mu, /* the main regressor appearing in the expression */
+			  pureParVec,  /* a vector of parameters to optimize for */
+			  pureParDimE,
+			  ssvec   /* a vector of additional regresssor and their name in the aargs list */
+			  );
   }
+
+
+  RcppExport SEXP fpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
+    static  ex fpisq = get_f_pm_Xpression();
+
+    /* the main parameters to optimize for */
+    SymbolVec pureParVec;
+    vector<double> pureParDimE;
+
+    /* the parameters to be fitted and their energy dimension */
+
+    pureParVec.push_back(B);       pureParDimE.push_back(1.);
+    pureParVec.push_back(f);       pureParDimE.push_back(1.);
+    pureParVec.push_back(c2);      pureParDimE.push_back(4.);
+    pureParVec.push_back(Lambda4); pureParDimE.push_back(1.);
+    pureParVec.push_back(Cf);      pureParDimE.push_back(2.);
+
+    
+
+
+    /* additional regressors besides the main regressor */
+    SymbolStringVec ssvec;
+    ssvec.push_back( SymbolStringPair( &L , "L" ) );
+    ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+
+    return    eval_ex_lso(fpisq, /* the expression to work on */
+			  x,par,aargs,deri, /* pass on the parameters from R environment */
+			  mu, /* the main regressor appearing in the expression */
+			  pureParVec,  /* a vector of parameters to optimize for */
+			  pureParDimE,
+			  ssvec   /* a vector of additional regresssor and their name in the aargs list */
+			  );
+  }
+
+
+
+
+
+
+
 
 };
