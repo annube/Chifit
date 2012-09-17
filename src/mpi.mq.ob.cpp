@@ -23,10 +23,12 @@ namespace mpi_mq_ob {
   symbol mu("a\\mu_q");
   symbol Lambda3("a\\Lambda_3");
   symbol Lambda4("a\\Lambda_4");
+  symbol Xi3("\\Xi_3");
   symbol L("L");
   symbol ZP("Z_P");
   symbol CMpm("C_{M_{\\pm}}");
   symbol Cf("D_{f}");
+  symbol CM0("C_{M_0}");
   symbol c2("c_2");
 
   ex Mpm_sq = 2*B*mu/ZP; 
@@ -53,7 +55,25 @@ namespace mpi_mq_ob {
     static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
     static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_M0 ;
 
-    static ex X = (  2*B/ZP * ( 1. + xi_0 * log_M0_L3 + CMpm ) ) ; 
+    static ex X = (  Mpm_sq * ( 1. + xi_0 * log_M0_L3 + CMpm ) ) ; 
+    return X;
+  }
+
+
+  static ex get_M_0_sq_Xpression(){
+
+    static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
+    static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
+    static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_M0 ;
+
+    static ex xi_pm  = Mpm_sq/ pow( 4. * Pi * f , 2 );
+    static ex fse_log_corr_Mpm  = gtilde1( sqrt( Mpm_sq ) *  L );
+    static ex log_Mpm_L3 = log( Mpm_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_Mpm ;
+
+    static ex log_M0_X3 = log( M0_sq / pow( Xi3 , 2 )  ) + fse_log_corr_M0 ;
+
+    static ex X =   Mpm_sq * ( 1. +2.*xi_pm * log_Mpm_L3 - xi_0 * log_M0_L3 + CMpm ) 
+      + 2 * c2 *( 1 - 4. * xi_0 * log_M0_X3 + CM0); 
     return X;
   }
 
@@ -96,6 +116,41 @@ namespace mpi_mq_ob {
     pureParVec.push_back(c2);      pureParDimE.push_back(4.);
     pureParVec.push_back(Lambda3); pureParDimE.push_back(1.);
     pureParVec.push_back(CMpm);    pureParDimE.push_back(2.);
+
+    
+
+
+    /* additional regressors besides the main regressor */
+    SymbolStringVec ssvec;
+    ssvec.push_back( SymbolStringPair( &L , "L" ) );
+    ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+
+    return    eval_ex_lso(mpisq, /* the expression to work on */
+			  x,par,aargs,deri, /* pass on the parameters from R environment */
+			  mu, /* the main regressor appearing in the expression */
+			  pureParVec,  /* a vector of parameters to optimize for */
+			  pureParDimE,
+			  ssvec   /* a vector of additional regresssor and their name in the aargs list */
+			  );
+  }
+
+
+
+  RcppExport SEXP mpi_0_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
+    static  ex mpisq = get_M_pm_sq_Xpression();
+
+    /* the main parameters to optimize for */
+    SymbolVec pureParVec;
+    vector<double> pureParDimE;
+
+    /* the parameters to be fitted and their energy dimension */
+
+    pureParVec.push_back(B);       pureParDimE.push_back(1.);
+    pureParVec.push_back(f);       pureParDimE.push_back(1.);
+    pureParVec.push_back(c2);      pureParDimE.push_back(4.);
+    pureParVec.push_back(Lambda3); pureParDimE.push_back(1.);
+    pureParVec.push_back(Xi3);     pureParDimE.push_back(1.);
+    pureParVec.push_back(CM0);    pureParDimE.push_back(2.);
 
     
 
