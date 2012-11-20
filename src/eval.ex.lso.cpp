@@ -54,9 +54,11 @@ SEXP eval_ex_lso(
 
   int num_pure_parameters = vpar.size() - (numLs-1);
 
+  /* deri map will contain all symbols that the expression will be derived for */
   SymbolVec deriMap(pureParVec);
   deriMap.push_back(R);
 
+  /* loop over all observations (dimension of one regressor vector) */
   for(int ix=0;ix<nx;ix++){
 
     /**
