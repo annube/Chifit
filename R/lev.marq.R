@@ -1,7 +1,7 @@
 
 
 
-lev.marq <- function( x,y,dy,fn,dfn,par.0,upd.range ){
+lev.marq <- function( x,y,dy,fn,dfn,par.0,upd.range,maxit=100,verbose=F ){
 
 
   beta = par.0
@@ -17,14 +17,15 @@ lev.marq <- function( x,y,dy,fn,dfn,par.0,upd.range ){
   chisqr = sum( ( res/dy )^2 )
   rel.diff = 1
 
- 
-  while( rel.diff > tol ){
-    
+
+  num.it = 0
+  while( rel.diff > tol && num.it<=maxit){
+    num.it = num.it + 1
     
     X <- dfn(x,beta)[,upd.range]
     rhs = t(X) %*% W %*% res
     Cw <- t(X) %*% W %*% X
-    print( sprintf(" lambda = %e " ,lambda) )
+    if(verbose)    print( sprintf(" lambda = %e " ,lambda) )
     dbeta =  ( as.vector( lev.marq.solution(rhs,Cw,lambda) ) )
     beta.new[upd.range] = beta[upd.range] + dbeta
 ##    print(beta.new)
@@ -38,9 +39,11 @@ lev.marq <- function( x,y,dy,fn,dfn,par.0,upd.range ){
 
     if( chisqr.new < chisqr ) {
       rel.diff = 1-chisqr.new/chisqr
-      print( rel.diff )
-      print( chisqr.new )
-      print(beta.new)
+      if(verbose){
+        print( rel.diff )
+        print( chisqr.new )
+        print(beta.new)
+      }
       beta = beta.new
       res = res.new
       chisqr = chisqr.new
