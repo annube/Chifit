@@ -16,12 +16,23 @@ using namespace std;
 void debug_print_symbol( symbol &s){ cout << s << endl;}
 
 
+/**
+ * for definiteness we have to fix the order of the parameters
+ *
+ * 1.) Parameters scaling with the lattice spacing
+ * 2.) the ratios of the lattice spacings
+ * 3.) lattice spacing dependent (but not in a trivial way, not scaling with R) parameters
+ *
+ */
+
+
 SEXP eval_ex_lso(
 		 ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
 		 symbol mainRegressor,
 		 SymbolVec pureParVec,
 		 vector<double> pureParDimE,
-		 SymbolStringVec addRegr
+		 SymbolStringVec addRegr,
+		 SymbolVec lsDepPar
 		 ) {
 
   Rcpp::NumericVector vpar(par);
@@ -55,8 +66,16 @@ SEXP eval_ex_lso(
   int num_pure_parameters = vpar.size() - (numLs-1);
 
   /* deri map will contain all symbols that the expression will be derived for */
+
+  /* 1.) the pure parameters  */
   SymbolVec deriMap(pureParVec);
+
+  /* 2.) the ratio to the largest lattice spacing */
   deriMap.push_back(R);
+
+  /* 3.) parameters depending on the lattice spacing but do not scale trivially with the lattice spacing */
+  deriMap.insert(deriMap.end(),lsDepPar.begin(),lsDepPar.end());
+
 
   /* loop over all observations (dimension of one regressor vector) */
   for(int ix=0;ix<nx;ix++){
@@ -97,6 +116,10 @@ SEXP eval_ex_lso(
     exmap par_numeric_vals;
     /* parameters */
     int lin_count = 0;
+
+    /* create numeric substitution list */
+
+
     for( SymbolVecIt svit = pureParVec.begin() ; svit!=pureParVec.end() ; svit++,lin_count++)
       par_numeric_vals[*svit] = vpar[lin_count];
 
@@ -111,6 +134,13 @@ SEXP eval_ex_lso(
     /* additional regressors */
     for( SymbolVecVecIt svvIt = addRegressorsValues.begin() ; svvIt!=addRegressorsValues.end() ; svvIt++)
       par_numeric_vals[ *(svvIt->first)] = (svvIt->second)[ix];
+
+
+    /* lattice spacing dependent parameters */
+    for( SymbolVecIt lsDepParIt=lsDepPar.begin(); lsDepParIt != lsDepPar.end(); lsDepParIt++)
+      par_numeric_vals[ *lsDepParIt ] = vpar[num_pure_parameters + (numLs-1) + latSpacIndex[ix]-1];
+
+
 
 
     if( calcDeri ){
@@ -129,6 +159,8 @@ SEXP eval_ex_lso(
 
 	  if( (*dit) == R ) {
 	    derires(ix,num_pure_parameters + latSpacIndex[ix]-2 ) = ex_to<numeric>( Xpress_num_eval ).to_double();
+	  } else if( /* check if we are working on one of the ls dep. Params */ ) {
+	    derires(ix,num_pure_parameters + (numLs-1) + ) = ex_to<numeric>( Xpress_num_eval ).to_double();
 	  } else {
 	    derires(ix,ipar) = ex_to<numeric>( Xpress_num_eval ).to_double();
 	  }

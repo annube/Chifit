@@ -36,7 +36,8 @@ SEXP eval_ex_lso(
 		 GiNaC::symbol mainRegressor,
 		 SymbolVec svec,
 		 std::vector<double> pureParDimE,
-		 SymbolStringVec addRegr
+		 SymbolStringVec addRegr,
+		 SymbolVec lsDepPar = SymbolVec(0)
 		 ) ;
 
 
