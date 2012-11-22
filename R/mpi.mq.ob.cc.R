@@ -14,7 +14,7 @@ mpi.0.mq.ob.cc <- function(x,par,aargs){
 }
 
 
-dmpi.0.mq.ob.cc <- function(x,par,x,aargs){
+dmpi.0.mq.ob.cc <- function(x,par,aargs){
   .Call("mpi_0_mq_ob",x,par,aargs,T,PACKAGE="chifit")
 }
 

@@ -93,4 +93,6 @@ par.zp
 mpi.mq.ob.cc(x,par,aargs)
 
 
-.Call("mpi_mq_ob_zp",  x , par.zp, aargs.zp, T, PACKAGE = "chifit")
+
+dmpi.mq.ob.cc(x,par,aargs) 
+dmpi.mq.ob.ZP.cc(x,par.zp,aargs.zp) 
