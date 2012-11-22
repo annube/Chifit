@@ -182,18 +182,22 @@ SEXP eval_ex_lso(
 	//derires(ix,num_pure_parameters + latSpacIndex[ix]-2 ) = ex_to<numeric>( Xpress_num_eval ).to_double();
 
 
-	derires(ix,expI) = numEvalXPression(Xpressions_to_evaluate[expI],par_numeric_vals);
 	switch( deriParGroup[expI] ){
 
 	case PG_Scaling_Par : 
+	  derires(ix,expI) = numEvalXPression(Xpressions_to_evaluate[expI],par_numeric_vals);
 	  cout << deriMap[expI] << " is a scaling (with a^n) parameter" << endl;
 	  break;
 
 	case PG_R : 
-	  cout << deriMap[expI] << " is a lattice spacing ratio parameter" << endl;
+	  if( latSpacIndex[ix] > 1 ){
+	    derires(ix,num_pure_parameters+latSpacIndex[ix]-2) = numEvalXPression(Xpressions_to_evaluate[expI],par_numeric_vals);
+	    cout << deriMap[expI] << " is a lattice spacing ratio parameter" << endl;
+	  }
 	  break;
 
 	case PG_LS_Dep :
+	  derires(ix,num_pure_parameters+numLs-1+latSpacIndex[ix]-1) = numEvalXPression(Xpressions_to_evaluate[expI],par_numeric_vals);
 	  cout << deriMap[expI] << " is parameter depending non-trivially on the lattice spacing" << endl;
 	  break;
 	default: cout << "Error: We have a parameter belonging to an unkown parameter group!!" << endl; break;
