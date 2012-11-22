@@ -53,6 +53,7 @@ SEXP eval_ex_lso(
 		 ) {
 
   Rcpp::NumericVector vpar(par);
+  cout << " size of vpar = " << vpar.size() << endl;
   Rcpp::NumericVector vx(x);
   int nx = vx.size();
 
@@ -80,7 +81,7 @@ SEXP eval_ex_lso(
   symbol R("R");
 
 
-  int num_pure_parameters = vpar.size() - (numLs-1);
+  int num_pure_parameters = pureParVec.size();
 
   /* deri map will contain all symbols that the expression will be derived for */
 
@@ -129,6 +130,7 @@ SEXP eval_ex_lso(
     }
   }
 
+  cout << " starting loop over measurements " << endl;
 
   /**
    * loop over all observations 
@@ -166,14 +168,17 @@ SEXP eval_ex_lso(
     /* 4.) additional regressors e.g. L/a */
     for( SymbolVecVecIt svvIt = addRegressorsValues.begin() ; svvIt!=addRegressorsValues.end() ; svvIt++) {
       par_numeric_vals[ *(svvIt->first)] = (svvIt->second)[ix];
-      // cout << "setting" << *(svvIt->first) << " to " << (svvIt->second)[ix] << endl;
+       cout << "setting" << *(svvIt->first) << " to " << (svvIt->second)[ix] << endl;
     }
 
 
     /* 5.) lattice spacing dependent parameters (not via R) mainly Z_P*/
-    for( SymbolVecIt lsDepParIt=lsDepPar.begin(); lsDepParIt != lsDepPar.end(); lsDepParIt++)
-      par_numeric_vals[ *lsDepParIt ] = vpar[num_pure_parameters + (numLs-1) + latSpacIndex[ix]-1];
-
+    for( SymbolVecIt lsDepParIt=lsDepPar.begin(); lsDepParIt != lsDepPar.end(); lsDepParIt++) {
+      int index=num_pure_parameters + (numLs-1) + latSpacIndex[ix]-1;
+      cout << " accesssing elem. # " << index  << " /"<< vpar.size() <<" of parameters " << endl;
+      par_numeric_vals[ *lsDepParIt ] = vpar[index];
+    }
+  
 
     if( ! calcDeri ){  evalres[ix] = numEvalXPression(Xpressions_to_evaluate[0],par_numeric_vals); }
     else {

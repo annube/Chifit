@@ -34,7 +34,7 @@ typedef std::vector<GiNaC::ex> ExVec;
 typedef ExVec::iterator ExVecIt;
 
 SEXP eval_ex_lso(
-		 ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
+		 GiNaC::ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
 		 GiNaC::symbol mainRegressor,
 		 SymbolVec svec,
 		 std::vector<double> pureParDimE,
