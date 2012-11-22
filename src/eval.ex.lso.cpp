@@ -53,7 +53,6 @@ SEXP eval_ex_lso(
 		 ) {
 
   Rcpp::NumericVector vpar(par);
-  cout << " size of vpar = " << vpar.size() << endl;
   Rcpp::NumericVector vx(x);
   int nx = vx.size();
 
@@ -105,9 +104,6 @@ SEXP eval_ex_lso(
   deriParGroup.insert( deriParGroup.end(),lsDepPar.size(),PG_LS_Dep);
 
 
-  for( int i = 0 ; i < deriParGroup.size() ; i++)
-    cout << deriParGroup[i] << " " << endl;
-
   ex X_R_subs = Xpression;
   /* 1.)  substitute R * par if not first lat. spac. */
   exmap R_times_par;
@@ -130,7 +126,6 @@ SEXP eval_ex_lso(
     }
   }
 
-  cout << " starting loop over measurements " << endl;
 
   /**
    * loop over all observations 
@@ -147,35 +142,29 @@ SEXP eval_ex_lso(
     int lin_count = 0;
     for( SymbolVecIt svit = pureParVec.begin() ; svit!=pureParVec.end() ; svit++,lin_count++) {
       par_numeric_vals[*svit] = vpar[lin_count];
-      //      cout << "setting " << *svit << " to "  << vpar[lin_count] << endl;
     }
 
 
     /* 2.) the lattice spacing scaling parameter R */
     if( latSpacIndex[ix] > 1 ) {
       par_numeric_vals[R] = vpar[num_pure_parameters+latSpacIndex[ix]-2];
-      // cout << "setting R = " << vpar[num_pure_parameters+latSpacIndex[ix]-2] << endl;
     } else {
       par_numeric_vals[R] = 1.;
-      // cout << "setting R = " << 1 << endl;
     }
 
 
     /* 3.) regressors \mu_q (unrenormalized q-mass)*/
     par_numeric_vals[mainRegressor] = vx[ix];
-    // cout << "setting x = " << vx[ix] << endl;
 
     /* 4.) additional regressors e.g. L/a */
     for( SymbolVecVecIt svvIt = addRegressorsValues.begin() ; svvIt!=addRegressorsValues.end() ; svvIt++) {
       par_numeric_vals[ *(svvIt->first)] = (svvIt->second)[ix];
-       cout << "setting" << *(svvIt->first) << " to " << (svvIt->second)[ix] << endl;
     }
 
 
     /* 5.) lattice spacing dependent parameters (not via R) mainly Z_P*/
     for( SymbolVecIt lsDepParIt=lsDepPar.begin(); lsDepParIt != lsDepPar.end(); lsDepParIt++) {
       int index=num_pure_parameters + (numLs-1) + latSpacIndex[ix]-1;
-      cout << " accesssing elem. # " << index  << " /"<< vpar.size() <<" of parameters " << endl;
       par_numeric_vals[ *lsDepParIt ] = vpar[index];
     }
   
@@ -191,21 +180,18 @@ SEXP eval_ex_lso(
 
 	case PG_Scaling_Par : 
 	  derires(ix,expI) = numEvalXPression(Xpressions_to_evaluate[expI],par_numeric_vals);
-	  cout << deriMap[expI] << " is a scaling (with a^n) parameter" << endl;
 	  break;
 
 	case PG_R : 
 	  if( latSpacIndex[ix] > 1 ){
 	    derires(ix,num_pure_parameters+latSpacIndex[ix]-2) = numEvalXPression(Xpressions_to_evaluate[expI],par_numeric_vals);
-	    cout << deriMap[expI] << " is a lattice spacing ratio parameter" << endl;
 	  }
 	  break;
 
 	case PG_LS_Dep :
 	  derires(ix,num_pure_parameters+numLs-1+latSpacIndex[ix]-1) = numEvalXPression(Xpressions_to_evaluate[expI],par_numeric_vals);
-	  cout << deriMap[expI] << " is parameter depending non-trivially on the lattice spacing" << endl;
 	  break;
-	default: cout << "Error: We have a parameter belonging to an unkown parameter group!!" << endl; break;
+	default: cerr << "Error: We have a parameter belonging to an unkown parameter group!!" << endl; break;
 	}
 
       }
