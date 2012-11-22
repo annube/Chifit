@@ -30,6 +30,8 @@ typedef std::pair<GiNaC::symbol *,Rcpp::NumericVector> SymbolVecPair;
 typedef std::vector< SymbolVecPair > SymbolVecVec;
 typedef SymbolVecVec::iterator SymbolVecVecIt;
 
+typedef std::vector<GiNaC::ex> ExVec;
+typedef ExVec::iterator ExVecIt;
 
 SEXP eval_ex_lso(
 		 ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,

@@ -1,4 +1,5 @@
 
+#include <math.h>
 
 #include <ginac/ginac.h>
 
@@ -15,6 +16,23 @@ using namespace std;
 
 void debug_print_symbol( symbol &s){ cout << s << endl;}
 
+double numEvalXPression(ex Xpression,exmap substitutions){
+    /* perform numeric avaluation */
+    ex Xpress_num_eval = Xpression.subs( substitutions ).evalf();
+    
+    
+    if( is_a<numeric>(Xpress_num_eval) ){
+      return ex_to<numeric>( Xpress_num_eval ).to_double();
+    } else {
+      cout << "ERROR: could not evaluate expression numerically."<< endl
+	   << "This is the remaining expression (most likly with unresolved symbols): " << endl;
+      cout << Xpress_num_eval << endl;
+      return NAN;
+    }
+}
+
+
+enum ParameterGroup {PG_Scaling_Par=0,PG_R,PG_LS_Dep};
 
 /**
  * for definiteness we have to fix the order of the parameters
@@ -24,7 +42,6 @@ void debug_print_symbol( symbol &s){ cout << s << endl;}
  * 3.) lattice spacing dependent (but not in a trivial way, not scaling with R) parameters
  *
  */
-
 
 SEXP eval_ex_lso(
 		 ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
@@ -67,131 +84,131 @@ SEXP eval_ex_lso(
 
   /* deri map will contain all symbols that the expression will be derived for */
 
+
+  /* vector containing the kind of group to which the parameters belongs*/
+  vector<ParameterGroup> deriParGroup;
+  
   /* 1.) the pure parameters  */
   SymbolVec deriMap(pureParVec);
+  // -> which parameter group  ?!
+  deriParGroup.insert( deriParGroup.end(),pureParVec.size(),PG_Scaling_Par);
 
   /* 2.) the ratio to the largest lattice spacing */
   deriMap.push_back(R);
+  // -> which parameter group  ?!
+  deriParGroup.insert( deriParGroup.end(),1,PG_R);
 
   /* 3.) parameters depending on the lattice spacing but do not scale trivially with the lattice spacing */
   deriMap.insert(deriMap.end(),lsDepPar.begin(),lsDepPar.end());
+  // -> which parameter group  ?!
+  deriParGroup.insert( deriParGroup.end(),lsDepPar.size(),PG_LS_Dep);
 
 
-  /* loop over all observations (dimension of one regressor vector) */
+  for( int i = 0 ; i < deriParGroup.size() ; i++)
+    cout << deriParGroup[i] << " " << endl;
+
+  ex X_R_subs = Xpression;
+  /* 1.)  substitute R * par if not first lat. spac. */
+  exmap R_times_par;
+  
+  for( int pi = 0 ; pi < pureParVec.size() ; pi++)
+    R_times_par[ pureParVec[pi] ]  = pureParVec[pi] * pow( R , pureParDimE[pi] );
+    
+  X_R_subs = Xpression.subs( R_times_par );
+
+
+  ExVec Xpressions_to_evaluate;
+
+
+  if( ! calcDeri){
+    Xpressions_to_evaluate.push_back( X_R_subs );
+  } else  {
+    /* push back the derivatives of X_R_subs */
+    for(unsigned long ipar = 0 ; ipar < deriMap.size() ; ipar++){
+      Xpressions_to_evaluate.push_back( X_R_subs.diff( deriMap[ipar] ) );
+    }
+  }
+
+
+  /**
+   * loop over all observations 
+   */
   for(int ix=0;ix<nx;ix++){
 
-    /**
-     *  pseudocode:
-     *  1.) if we are not at the first lattice spacing
-     *      replace the parameters by R * the Parametere
-     *  2.) if we calculate the derivative derive Xpress.
-     *      with respect to the parameter under consideration
-     *  3.) substitute the numerical values of the parameter,
-     *      the quark mass and other values like L and ZP
-     */
+    /* first create the substitution map */
+    exmap par_numeric_vals;
 
 
+    /* we have to replace five kinds of symbols in the expression: */
 
-    ex X_R_subs = Xpression;
-
-    /* 1.)  substitute R * par if not first lat. spac. */
-    if( latSpacIndex[ix] > 1 ){
-
-      exmap R_times_par;
-
-
-      for( int pi = 0 ; pi < pureParVec.size() ; pi++)
-	R_times_par[ pureParVec[pi] ]  = pureParVec[pi] * pow( R , pureParDimE[pi] );
-
-
-      X_R_subs = Xpression.subs( R_times_par );
+    /* 1.) the ordinary parameters f0, B0, c2, ...*/
+    int lin_count = 0;
+    for( SymbolVecIt svit = pureParVec.begin() ; svit!=pureParVec.end() ; svit++,lin_count++) {
+      par_numeric_vals[*svit] = vpar[lin_count];
+      //      cout << "setting " << *svit << " to "  << vpar[lin_count] << endl;
     }
 
 
-
-    /**
-     * prepare numeric evaluation because it
-     * can be used also for the deri 
-     */
-    exmap par_numeric_vals;
-    /* parameters */
-    int lin_count = 0;
-
-    /* create numeric substitution list */
-
-
-    for( SymbolVecIt svit = pureParVec.begin() ; svit!=pureParVec.end() ; svit++,lin_count++)
-      par_numeric_vals[*svit] = vpar[lin_count];
-
-
-    if( latSpacIndex[ix] > 1 ) 
+    /* 2.) the lattice spacing scaling parameter R */
+    if( latSpacIndex[ix] > 1 ) {
       par_numeric_vals[R] = vpar[num_pure_parameters+latSpacIndex[ix]-2];
+      // cout << "setting R = " << vpar[num_pure_parameters+latSpacIndex[ix]-2] << endl;
+    } else {
+      par_numeric_vals[R] = 1.;
+      // cout << "setting R = " << 1 << endl;
+    }
 
 
-    /* regressors */
+    /* 3.) regressors \mu_q (unrenormalized q-mass)*/
     par_numeric_vals[mainRegressor] = vx[ix];
+    // cout << "setting x = " << vx[ix] << endl;
 
-    /* additional regressors */
-    for( SymbolVecVecIt svvIt = addRegressorsValues.begin() ; svvIt!=addRegressorsValues.end() ; svvIt++)
+    /* 4.) additional regressors e.g. L/a */
+    for( SymbolVecVecIt svvIt = addRegressorsValues.begin() ; svvIt!=addRegressorsValues.end() ; svvIt++) {
       par_numeric_vals[ *(svvIt->first)] = (svvIt->second)[ix];
+      // cout << "setting" << *(svvIt->first) << " to " << (svvIt->second)[ix] << endl;
+    }
 
 
-    /* lattice spacing dependent parameters */
+    /* 5.) lattice spacing dependent parameters (not via R) mainly Z_P*/
     for( SymbolVecIt lsDepParIt=lsDepPar.begin(); lsDepParIt != lsDepPar.end(); lsDepParIt++)
       par_numeric_vals[ *lsDepParIt ] = vpar[num_pure_parameters + (numLs-1) + latSpacIndex[ix]-1];
 
 
+    if( ! calcDeri ){  evalres[ix] = numEvalXPression(Xpressions_to_evaluate[0],par_numeric_vals); }
+    else {
+      /* loop over expressions */
+      for( unsigned long  expI = 0 ; expI < Xpressions_to_evaluate.size() ; expI++){
+	//derires(ix,num_pure_parameters + latSpacIndex[ix]-2 ) = ex_to<numeric>( Xpress_num_eval ).to_double();
 
 
-    if( calcDeri ){
-      /* at this point we would do the derivatives */
-      // for i_par in 1 to number of parameters
-      int ipar = 0;
-      for( SymbolVecIt dit = deriMap.begin() ; dit != deriMap.end() ; dit++,ipar++){
+	derires(ix,expI) = numEvalXPression(Xpressions_to_evaluate[expI],par_numeric_vals);
+	switch( deriParGroup[expI] ){
 
-	if( (*dit) == R && latSpacIndex[ix] == 1 ) continue;
+	case PG_Scaling_Par : 
+	  cout << deriMap[expI] << " is a scaling (with a^n) parameter" << endl;
+	  break;
 
-	ex Xpress_deri = X_R_subs.diff( (*dit) ,1 );
+	case PG_R : 
+	  cout << deriMap[expI] << " is a lattice spacing ratio parameter" << endl;
+	  break;
 
-	ex Xpress_num_eval = Xpress_deri.subs( par_numeric_vals ).evalf();
-
-	if( is_a<numeric>(Xpress_num_eval) ){
-
-	  if( (*dit) == R ) {
-	    derires(ix,num_pure_parameters + latSpacIndex[ix]-2 ) = ex_to<numeric>( Xpress_num_eval ).to_double();
-	  } else if( /* check if we are working on one of the ls dep. Params */ ) {
-	    derires(ix,num_pure_parameters + (numLs-1) + ) = ex_to<numeric>( Xpress_num_eval ).to_double();
-	  } else {
-	    derires(ix,ipar) = ex_to<numeric>( Xpress_num_eval ).to_double();
-	  }
-	} else {
-	  cout << Xpress_num_eval << endl;
+	case PG_LS_Dep :
+	  cout << deriMap[expI] << " is parameter depending non-trivially on the lattice spacing" << endl;
+	  break;
+	default: cout << "Error: We have a parameter belonging to an unkown parameter group!!" << endl; break;
 	}
-      }
 
-
-
-
-    } else {
-
-      /* perform numeric avaluation */
-      ex Xpress_num_eval = X_R_subs.subs( par_numeric_vals ).evalf();
-	
-
-      if( is_a<numeric>(Xpress_num_eval) ){
-	evalres[ix] = ex_to<numeric>( Xpress_num_eval ).to_double();
-      } else {
-	cout << Xpress_num_eval << endl;
       }
     }
-
 
   }
 
 
-  if( calcDeri )
-    return derires;
+  if( ! calcDeri )
+    return( evalres );
   else
-    return evalres;
+    return (derires);
+
 
 }
