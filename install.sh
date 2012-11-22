@@ -6,9 +6,9 @@ then
   rm -r $R_LIBS/00LOCK-chifit
 fi
 
-cd ${HOME}/andreas/dev
+#cd ${HOME}/andreas/dev
 
 
 R --vanilla <<EOF
-install.packages("chifit",repos=NULL)
+install.packages(".",repos=NULL)
 EOF
