@@ -1,7 +1,7 @@
 
 
 mpi.mq.ob.ZP.cc <- function(x,par,aargs){
-  .Call("mpi_mq_ob",x,par,aargs,F,PACKAGE="chifit")
+  .Call("mpi_mq_ob_zp",x,par,aargs,F,PACKAGE="chifit")
 }
 
 
