@@ -11,8 +11,9 @@ using namespace GiNaC;
 
 
 #include "gtilde.h"
-
 #include "eval.ex.lso.h"
+
+#include "mpi.mq.ob.h"
 
 
 /* we need a namespace here because the same symbols as below are defined in mpi.mq.cpp as well */
@@ -50,7 +51,7 @@ namespace mpi_mq_ob {
 //   ex log_Mpm_L4 = log( Mpm_sq / pow( Lambda4 , 2 ) ) + fse_log_corr_Mpm;
 
 
-  static ex get_M_pm_sq_Xpression(){
+  ex get_M_pm_sq_Xpression(){
     static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
     static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
     static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_M0 ;
@@ -60,7 +61,7 @@ namespace mpi_mq_ob {
   }
 
 
-  static ex get_M_0_sq_Xpression(){
+  ex get_M_0_sq_Xpression(){
 
     static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
     static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
@@ -78,7 +79,7 @@ namespace mpi_mq_ob {
   }
 
 
-  static ex get_f_pm_Xpression(){
+  ex get_f_pm_Xpression(){
     static ex xi_pm = Mpm_sq/ pow( 4. * Pi * f , 2 );
     static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
     static ex fse_log_corr_Mpm = gtilde1( sqrt( Mpm_sq ) *  L );
@@ -96,7 +97,7 @@ namespace mpi_mq_ob {
   /**************************
    *
    *
-   *        PION MASS
+   *    CHARGED PION MASS
    *
    *
    *
@@ -135,6 +136,14 @@ namespace mpi_mq_ob {
   }
 
 
+  /**************************
+   *
+   *
+   *    NEUTRAL PION MASS
+   *
+   *
+   *
+   **************************/
 
   RcppExport SEXP mpi_0_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
     static  ex mpisq = get_M_0_sq_Xpression();
@@ -169,6 +178,15 @@ namespace mpi_mq_ob {
 			  );
   }
 
+
+  /**************************
+   *
+   *
+   *    PION DECAY
+   *
+   *
+   *
+   **************************/
 
   RcppExport SEXP fpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
     static  ex fpisq = get_f_pm_Xpression();
