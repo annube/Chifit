@@ -33,21 +33,17 @@ lev.marq <- function( x,y,dy,fn,dfn,par.0,par.priors=par.0,priors.sigmas=rep(Inf
     if(verbose)    print( sprintf(" lambda = %e " ,lambda) )
     dbeta =  ( as.vector( lev.marq.solution(rhs,Cw,lambda) ) )
 
-    ## primitive line search
-##     obj.fn <- function(alpha) chisqr.fn(beta+alpha*dbeta)
-##     or <- optim(c(0),obj.fn)
-
-    
     
     beta.new[upd.range] = beta[upd.range] + dbeta
-##    print(beta.new)
+    if( verbose )  print(beta.new)
+    
     res.new = try( y - fn(x,beta.new) )
     if( inherits( res.new , "try-error" ) || any( is.nan( res.new ) ) ) {
       print("increasing lambda because of bad evaluation of new residue " )
       lambda = lambda * nu
       next
     }
-##    print(res.new)
+    if( verbose )  print(res.new)
     chisqr.new = sum( ( res.new/dy )^2 ) + sum((beta.new - par.priors)^2/priors.sigmas^2)
 
     if( chisqr.new < chisqr  ) {
