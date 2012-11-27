@@ -23,9 +23,15 @@ plotwitherror(x,y,dy)
 plot(function(x) f(x,par) ,xlim=c(0.5,6),add=T)
 
 
-so.res <- simple.optim(x,y,dy,f,df,c(-1,1),verbose=T)
+lm.res <- lev.marq(x,y,dy,f,df,c(1,1),verbose=T,par.priors=c(3.5,7.1),priors.sigmas=c(Inf,Inf))
+
+plot(function(x) f(x,lm.res$beta) ,xlim=c(0.5,6),add=T,col="red")
 
 wnlls.res <- wnlls(x,y,dy,f.in=f,df.in=df,par=c(1,1))
-plot(function(x) f(x,so.res$beta) ,xlim=c(0.5,6),add=T,col="red")
+
+plot(function(x) f(x,wnlls.res$beta) ,xlim=c(0.5,6),add=T,col="green")
+
+plot.wnlls(wnlls.res)
+
 
 
