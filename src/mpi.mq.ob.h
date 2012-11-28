@@ -29,5 +29,8 @@ namespace mpi_mq_ob {
   extern  GiNaC::symbol CM0;
   extern  GiNaC::symbol c2;
 
+  extern GiNaC::ex Mpm_sq;
+  extern GiNaC::ex M0_sq;
+
 
 };
