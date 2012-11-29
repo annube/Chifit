@@ -84,8 +84,11 @@ double R_integrand(double y, void *params){
 }
 
 
+//this is the implementation of the R function devided by r_i^(k+1) with the r_i substituted out of the exponent
+// to get the correct R function you have to multiply this function with r_i^(k+1) !!!
 
-double tmFS_R_fn(double k,double x,double r){
+
+double eval_tmFS_R(double x,int k,double r){
 
 //   cout << "k = " << (k) << endl
 //        << "x = " << (x) << endl
@@ -140,7 +143,48 @@ double tmFS_R_fn(double k,double x,double r){
 using namespace Rcpp;
 
 RcppExport SEXP tmFS_R_fn_R(SEXP x,SEXP k, SEXP r){
-  return wrap( tmFS_R_fn(as<int>(k),as<double>(x), as<double>(r) ) );
+  return wrap( eval_tmFS_R(as<double>(x),as<int>(k), as<double>(r) ) );
 }
 
 
+
+ex eval_tmFS_R_fn(const ex &x,const ex & k , const ex & r){
+  if( is_a<numeric>(k) ) 
+    return tmFS_R(x,ex_to<numeric>(k).to_int(),r).hold();
+  else 
+    return tmFS_R(x,k,r).hold();
+}
+
+
+
+ex evalf_tmFS_R_fn(const ex &x,const ex & k , const ex & r){
+  if( is_a<numeric>(x) &&  is_a<numeric>(k) && is_a<numeric>(r) ) {
+
+
+    int kn=ex_to<numeric>(k).to_double();
+    double k_fract = ex_to<numeric>(k).to_double() - (double)kn;
+    if( k_fract != 0.0 ) cerr << "Error k is not integer in tmFS::evalf_tmFS_R_fn" << endl;
+
+    return eval_tmFS_R(
+		      ex_to<numeric>(x).to_double(),
+		      kn,
+		      ex_to<numeric>(r).to_double()
+		      ) ;
+  } else {
+    return tmFS_R(x,k,r).hold();
+  }
+}
+
+
+RcppExport SEXP tmFS_R_fn_R_ginac(SEXP x,SEXP k, SEXP r){
+
+  ex fnv=tmFS_R(as<double>(x),as<int>(k),as<double>(r));
+
+  return wrap( ex_to<numeric>(fnv.evalf()).to_double() );
+}
+
+
+
+REGISTER_FUNCTION(tmFS_R,eval_func(eval_tmFS_R_fn).
+		  evalf_func(evalf_tmFS_R_fn)
+		  );

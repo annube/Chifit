@@ -7,6 +7,6 @@
 
 using namespace GiNaC;
 
-
+DECLARE_FUNCTION_3P(tmFS_R);
 
 #endif

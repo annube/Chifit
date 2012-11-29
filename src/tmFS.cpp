@@ -18,6 +18,7 @@ using namespace mpi_mq_ob;
 #include "tmFS.h"
 #include "gtilde.h"
 #include "tmFS.B20.fn.h"
+#include "tmFS.R.fn.h"
 
 namespace tmFS{
 
@@ -59,6 +60,15 @@ namespace tmFS{
       * pow(r_0,3)
       * B2k_0( lambda_0 , 1 );
 
+    ex I_M_0_4_Rs_contr = 
+      - 2 * pow(xi_pm,2) / lambda_pm
+      * 2./3.
+      *(
+	 1. *     r_0    * tmFS_R(lambda_0,0,r_0)
+	+2. * pow(r_0,2) * tmFS_R(lambda_0,1,r_0)
+	-4. * pow(r_0,3) * tmFS_R(lambda_0,2,r_0)
+	);
+
 
 
     // I_M_pm_2_contr = 0  !! -> no work needed
@@ -72,7 +82,21 @@ namespace tmFS{
     ex I_M_pm_4_B_2_contr = 
       - 2 * pow(xi_pm,2) / lambda_pm 
       * (92./9.+8./3.*log_Mpm_L1 + 8. * log_Mpm_L2)
+      // * r_pm^3 = 1 (r_pm = 1) 
       * B2k_0( lambda_pm , 1 );
+
+
+
+    ex I_M_pm_4_Rs_contr = 
+      - 2 * pow(xi_pm,2) / lambda_pm
+      * 1./3.
+      *(
+	11. * tmFS_R(lambda_pm,0,1.)
+	-20. * tmFS_R(lambda_pm,1,1.)
+	-32. * tmFS_R(lambda_pm,2,1.)
+	)
+      ;
+
 
 
 
