@@ -23,12 +23,14 @@ using namespace GiNaC;
 
 #include <gsl/gsl_integration.h>
 
+#include <Rmath.h>
+
 
 #include "utils.h"
 #include "tmFS.R.fn.h"
+#include "gtilde.partitions.h"
 
 
-#include <Rmath.h>
 
 
 
@@ -108,15 +110,26 @@ double tmFS_R_fn(double k,double x,double r){
 
   double intResult,intAbsErr;
 
-  gsl_integration_qagi(&F,0,1.e-3,WS_SIZE,w,&intResult,&intAbsErr);
+  double sum=0;
 
-//   cout << "Integration result : " << intResult << endl;
-//   cout << "Abs Error          : " << intAbsErr << endl;
-//   cout << " intervals         : " << w->size << endl;
+  for( int n = MAX_ORDER ; n >= 1 ; n--){
+    rip.x = x * sqrt(n);
+    gsl_integration_qagi(&F,0,1.e-6,WS_SIZE,w,&intResult,&intAbsErr);
+//     cout << "Integration result : " << intResult << endl;
+//     cout << "Abs Error          : " << intAbsErr << endl;
+//     cout << " intervals         : " << w->size << endl;
+
+//    double reldiff = intResult/sum;
+//    cout << "ds/s = " << intResult/sum << endl;
+
+    sum += (double) getPartition(n)/sqrt((double)n) * intResult ;
+
+  }
+
 
 //  gsl_integration_workspace_free(w);
 
-  return (intResult);
+  return (sum);
 
 }
 
@@ -129,3 +142,5 @@ using namespace Rcpp;
 RcppExport SEXP tmFS_R_fn_R(SEXP x,SEXP k, SEXP r){
   return wrap( tmFS_R_fn(as<int>(k),as<double>(x), as<double>(r) ) );
 }
+
+
