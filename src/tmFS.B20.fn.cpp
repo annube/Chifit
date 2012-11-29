@@ -40,7 +40,6 @@ double eval_B2k_0(double x,int k){
 
   double stochastic_fact = 
     (double)( 2 * factorial(2*k))/ (double)( factorial(k) * exp2(k) );  // stochastik factor
-
   std::cout << "stoch. fact. " << stochastic_fact << std::endl;
 
   return 
