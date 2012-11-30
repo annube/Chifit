@@ -99,6 +99,17 @@ namespace tmFS{
 
 
 
+    ex all=
+        I_M_0_2_contr
+      + I_M_0_4_B_0_contr
+      + I_M_0_4_B_2_contr
+      + I_M_0_4_Rs_contr
+      + I_M_pm_4_B_0_contr
+      + I_M_pm_4_B_2_contr
+      + I_M_pm_4_Rs_contr
+      ;
+
+
 
     return 0;
 

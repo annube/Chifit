@@ -185,6 +185,7 @@ RcppExport SEXP tmFS_R_fn_R_ginac(SEXP x,SEXP k, SEXP r){
 
 
 
-REGISTER_FUNCTION(tmFS_R,eval_func(eval_tmFS_R_fn).
+REGISTER_FUNCTION(tmFS_R,
+		  eval_func(eval_tmFS_R_fn).
 		  evalf_func(evalf_tmFS_R_fn)
 		  );

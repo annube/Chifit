@@ -1,12 +1,12 @@
 
 
 mpi.mq.ob.cc <- function(x,par,aargs){
-  .Call("mpi_mq_ob",x,par,aargs,F,PACKAGE="chifit")
+  .Call("mpi_mq_ob",x,par,aargs,F,FSE=0,PACKAGE="chifit")
 }
 
 
 dmpi.mq.ob.cc <- function(x,par,aargs){
-  .Call("mpi_mq_ob",x,par,aargs,T,PACKAGE="chifit")
+  .Call("mpi_mq_ob",x,par,aargs,T,FSE=0,PACKAGE="chifit")
 }
 
 mpi.0.mq.ob.cc <- function(x,par,aargs){

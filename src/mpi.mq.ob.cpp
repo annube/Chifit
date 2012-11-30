@@ -14,6 +14,7 @@ using namespace GiNaC;
 #include "eval.ex.lso.h"
 
 #include "mpi.mq.ob.h"
+#inlcude "tmFS.h"
 
 
 /* we need a namespace here because the same symbols as below are defined in mpi.mq.cpp as well */
@@ -32,23 +33,26 @@ namespace mpi_mq_ob {
   symbol CM0("C_{M_0}");
   symbol c2("c_2");
 
+
+  vector<symbol> allSymbolsOrdered;
+
+  void initAllParamsOrdered(){
+    allSymbolsOrdered.push_back(B);
+    allSymbolsOrdered.push_back(f);
+    allSymbolsOrdered.push_back(c2);
+    allSymbolsOrdered.push_back(tmFS::Lambda1);
+    allSymbolsOrdered.push_back(tmFS::Lambda2);
+    allSymbolsOrdered.push_back(Lambda3);
+    allSymbolsOrdered.push_back(Lambda4);
+    allSymbolsOrdered.push_back(Xi3);
+    allSymbolsOrdered.push_back(CMpm);
+    allSymbolsOrdered.push_back(Cf);
+    allSymbolsOrdered.push_back(CM0);
+  }
+
+
   ex Mpm_sq = 2*B*mu/ZP; 
   ex M0_sq = sqrt( pow(  2*B*mu/ZP + 2*c2 ,2 ) ); 
-
-
-//   ex xi_pm = Mpm_sq/ pow( 4. * Pi * f , 2 );
-//   ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
-
-
-//   ex fse_log_corr_Mpm = gtilde1( sqrt( Mpm_sq ) *  L );
-//   ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
-
-  
-//   ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 ) ) + fse_log_corr_M0 ;
-//   ex log_M0_L4 = log( M0_sq / pow( Lambda4 , 2 ) ) + fse_log_corr_M0;
-
-//   ex log_Mpm_L3 = log( Mpm_sq / pow( Lambda3 , 2 ) ) + fse_log_corr_Mpm;
-//   ex log_Mpm_L4 = log( Mpm_sq / pow( Lambda4 , 2 ) ) + fse_log_corr_Mpm;
 
 
   ex get_M_pm_sq_Xpression(){
@@ -103,7 +107,7 @@ namespace mpi_mq_ob {
    *
    **************************/
 
-  RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
+  RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE) {
     static  ex mpisq = get_M_pm_sq_Xpression();
 
     /* the main parameters to optimize for */
