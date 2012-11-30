@@ -32,6 +32,8 @@ ampi.mq.ob <- function(x,par,aargs){
 }
 
 ZPs = c( 0.9 , 0.8 , 0.75 )
+##ZPs = c( 1 , 1 , 1 )
+
 
 
 x = c(
