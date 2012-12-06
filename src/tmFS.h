@@ -4,10 +4,8 @@
 #define TMFS_H
 
 
-namespace tmFS{
+namespace chifit{
 
-  extern symbol Lambda1;
-  extern symbol Lambda2;
 }
 
 

@@ -33,6 +33,10 @@ typedef SymbolVecVec::iterator SymbolVecVecIt;
 typedef std::vector<GiNaC::ex> ExVec;
 typedef ExVec::iterator ExVecIt;
 
+
+double numEvalXPression(ex Xpression,exmap substitutions);
+
+
 SEXP eval_ex_lso(
 		 GiNaC::ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
 		 GiNaC::symbol mainRegressor,

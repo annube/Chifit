@@ -9,6 +9,8 @@
 #include <vector>
 
 #include "eval.ex.lso.h"
+
+#include "symbols.h"
 #include "mpi.mq.ob.h"
 
 
@@ -16,7 +18,7 @@ using namespace GiNaC;
 using namespace std;
 
 
-namespace mpi_mq_ob{
+namespace chifit{
 
 
 
@@ -27,7 +29,8 @@ namespace mpi_mq_ob{
    */
 
   RcppExport SEXP mpi_mq_ob_zp(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
-    static  ex mpisq = get_M_pm_sq_Xpression();
+    ParameterMap pm;
+    static  ex mpisq = get_M_pm_sq_Xpression(pm);
   
     /* the main parameters to optimize for */
     SymbolVec pureParVec;

@@ -160,14 +160,9 @@ ex eval_tmFS_R_fn(const ex &x,const ex & k , const ex & r){
 ex evalf_tmFS_R_fn(const ex &x,const ex & k , const ex & r){
   if( is_a<numeric>(x) &&  is_a<numeric>(k) && is_a<numeric>(r) ) {
 
-
-    int kn=ex_to<numeric>(k).to_double();
-    double k_fract = ex_to<numeric>(k).to_double() - (double)kn;
-    if( k_fract != 0.0 ) cerr << "Error k is not integer in tmFS::evalf_tmFS_R_fn" << endl;
-
     return eval_tmFS_R(
 		      ex_to<numeric>(x).to_double(),
-		      kn,
+		      MyExToInt( k ),
 		      ex_to<numeric>(r).to_double()
 		      ) ;
   } else {

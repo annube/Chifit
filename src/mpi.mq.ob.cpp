@@ -13,54 +13,35 @@ using namespace GiNaC;
 #include "gtilde.h"
 #include "eval.ex.lso.h"
 
+#include "symbols.h"
 #include "mpi.mq.ob.h"
-#inlcude "tmFS.h"
+#include "tmFS.h"
+
 
 
 /* we need a namespace here because the same symbols as below are defined in mpi.mq.cpp as well */
-namespace mpi_mq_ob {
+namespace chifit {
 
-  symbol B("aB_0");
-  symbol f("af");
-  symbol mu("a\\mu_q");
-  symbol Lambda3("a\\Lambda_3");
-  symbol Lambda4("a\\Lambda_4");
-  symbol Xi3("\\Xi_3");
-  symbol L("L");
-  symbol ZP("Z_P");
-  symbol CMpm("C_{M_{\\pm}}");
-  symbol Cf("D_{f}");
-  symbol CM0("C_{M_0}");
-  symbol c2("c_2");
-
-
-  vector<symbol> allSymbolsOrdered;
-
-  void initAllParamsOrdered(){
-    allSymbolsOrdered.push_back(B);
-    allSymbolsOrdered.push_back(f);
-    allSymbolsOrdered.push_back(c2);
-    allSymbolsOrdered.push_back(tmFS::Lambda1);
-    allSymbolsOrdered.push_back(tmFS::Lambda2);
-    allSymbolsOrdered.push_back(Lambda3);
-    allSymbolsOrdered.push_back(Lambda4);
-    allSymbolsOrdered.push_back(Xi3);
-    allSymbolsOrdered.push_back(CMpm);
-    allSymbolsOrdered.push_back(Cf);
-    allSymbolsOrdered.push_back(CM0);
-  }
 
 
   ex Mpm_sq = 2*B*mu/ZP; 
   ex M0_sq = sqrt( pow(  2*B*mu/ZP + 2*c2 ,2 ) ); 
 
 
-  ex get_M_pm_sq_Xpression(){
+  ex get_M_pm_sq_Xpression(ParameterMap & pm ){
     static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
     static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
     static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_M0 ;
 
     static ex X = (  Mpm_sq * ( 1. + xi_0 * log_M0_L3 + CMpm ) ) ; 
+
+    pm.add( B );
+    pm.add( f );
+    pm.add( c2 );
+    pm.add( Lambda3 );
+    pm.add( CMpm );
+
+
     return X;
   }
 
@@ -107,36 +88,53 @@ namespace mpi_mq_ob {
    *
    **************************/
 
-  RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE) {
-    static  ex mpisq = get_M_pm_sq_Xpression();
+  RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE,SEXP fitZP) {
+
+    ParameterMap pm;
+
+    ex mpisq = get_M_pm_sq_Xpression(pm);
+
+    //    pm.print();
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
     vector<double> pureParDimE;
 
     /* the parameters to be fitted and their energy dimension */
+    /* they will be autagically selected by the expression generating function */
 
-    pureParVec.push_back(B);       pureParDimE.push_back(1.);
-    pureParVec.push_back(f);       pureParDimE.push_back(1.);
-    pureParVec.push_back(c2);      pureParDimE.push_back(4.);
-    pureParVec.push_back(Lambda3); pureParDimE.push_back(1.);
-    pureParVec.push_back(CMpm);    pureParDimE.push_back(2.);
+    const SymbolBoolVec & useMap=pm.getMap();
 
+
+    for( int p  = 0 ; p < useMap.size() ; p++){
+      if( useMap[p].second ) { 
+	pureParVec.push_back( useMap[p].first );
+	pureParDimE.push_back( allSymbolsOrderedDimensions[p] );
+      }
+    }
     
+
+
 
 
     /* additional regressors besides the main regressor */
     SymbolStringVec ssvec;
+    SymbolVec lsDepPar;
     ssvec.push_back( SymbolStringPair( &L , "L" ) );
-    ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+
+    if( ! Rcpp::as<bool>(fitZP) )
+      ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+    else      
+      lsDepPar.push_back(ZP);
+
 
     return    eval_ex_lso(mpisq, /* the expression to work on */
 			  x,par,aargs,deri, /* pass on the parameters from R environment */
 			  mu, /* the main regressor appearing in the expression */
 			  pureParVec,  /* a vector of parameters to optimize for */
 			  pureParDimE,
-			  ssvec   /* a vector of additional regresssor and their name in the aargs list */
-			  );
+			  ssvec,   /* a vector of additional regresssor and their name in the aargs list */
+			  lsDepPar);
   }
 
 

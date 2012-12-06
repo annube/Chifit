@@ -10,23 +10,21 @@
 
 using namespace GiNaC;
 
+#include <Rcpp.h>
 
 #include "mpi.mq.ob.h"
 
-using namespace mpi_mq_ob;
 
 #include "tmFS.h"
 #include "gtilde.h"
 #include "tmFS.B20.fn.h"
 #include "tmFS.R.fn.h"
+#include "symbols.h"
+#include "eval.ex.lso.h"
 
-namespace tmFS{
+namespace chifit{
 
-  symbol Lambda1("\\Lambda_1");
-  symbol Lambda2("\\Lambda_2");
-
-
-  ex get_tm_FSE(){
+  ex get_tm_FSE(ParameterMap & pm){
     ex lambda_pm=sqrt( Mpm_sq ) *  L;
     ex lambda_0=sqrt( M0_sq ) *  L;
 
@@ -98,8 +96,15 @@ namespace tmFS{
       ;
 
 
+    pm.add( B );
+    pm.add( f );
+    pm.add( c2 );
+    pm.add( Lambda1 );
+    pm.add( Lambda2 );
+    pm.add( Lambda3 );
+    pm.add( Lambda4 );
 
-    ex all=
+    ex X=
         I_M_0_2_contr
       + I_M_0_4_B_0_contr
       + I_M_0_4_B_2_contr
@@ -111,7 +116,38 @@ namespace tmFS{
 
 
 
-    return 0;
+
+
+    return X;
+
+  }
+
+
+  RcppExport SEXP evalTMFSE(SEXP par,SEXP mu,SEXP L,SEXP ZP){
+    Rcpp::NumericVector vpar(par);
+    ParameterMap pm;
+
+    ex X=get_tm_FSE(pm);
+
+
+    const SymbolBoolVec & useMap=pm.getMap();
+
+    exmap subsmap;
+
+    subsmap[chifit::mu] = Rcpp::as<double>(mu);
+    subsmap[chifit::L] = Rcpp::as<double>(L);
+    subsmap[chifit::ZP] = Rcpp::as<double>(ZP);
+
+    for( int p  = 0, lincount= 0; p < useMap.size() ; p++){
+      if( useMap[p].second ) { 
+	subsmap[useMap[p].first] = vpar[lincount++];
+      }
+    }
+
+
+
+    return Rcpp::wrap( numEvalXPression( X, subsmap));
+
 
   }
 

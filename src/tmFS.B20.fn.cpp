@@ -64,7 +64,7 @@ ex evalf_B2k_0_fn(const ex & x,const ex &k){
   if( is_a<numeric>(x) &&  is_a<numeric>(k) ) {
     return eval_B2k_0(
 		      ex_to<numeric>(x).to_double(),
-		      ex_to<numeric>(k).to_int()
+		      MyExToInt(k)
 		      ) ;
   } else {
     return B2k_0(x,k).hold();
