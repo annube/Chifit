@@ -60,59 +60,24 @@ namespace chifit {
 
     const SymbolBoolVec & getMap(){ return map; }
 
-    bool parUsed(GiNaC::symbol s){
-      IndexMapIt itFound = indexMap.find( s );
-
-      if( itFound != indexMap.end() )
-	return map[ itFound->second ].second;
-      else
-	std::cerr << "Error in ParameterMap::parUsed : symbol "<< s <<" not in global symbol table !!" << std::endl;
-    }
+    bool parUsed(GiNaC::symbol s);
 
   public:
 
     /**
      * Constructor
      */
-
-    ParameterMap(){
-      initAllParamsOrdered();
-
-/*       for( int i = 0 ; i< allSymbolsOrdered.size(); i++ ){ */
-/* 	map.push_back(std::pair<GiNaC::symbol,bool>(allSymbolsOrdered[i],false)); */
-/* 	indexMap.insert(std::pair<GiNaC::symbol,int>( allSymbolsOrdered[i] , i ) ) ; */
-/*       } */
-    }
-
+    ParameterMap();
 
     /**
      * mark a parameter as used
      */
-
-    void add(GiNaC::symbol s){
-
-/*       std::cout << "printing index map " << std::endl; */
-/*       for(IndexMapIt imi=indexMap.begin() ; imi != indexMap.end() ; imi++) */
-/* 	std::cout << imi->first << " " << imi->second << std::endl; */
-
-//      std::cout << "found symbol at index " << indexMap[ s ] << std::endl;
-      IndexMapIt itFound = indexMap.find( s );
-
-      if( itFound != indexMap.end() )
-	map[ itFound->second ].second = true;
-      else
-	std::cerr << "Error in ParameterMap::add : symbol "<< s <<" not in global symbol table !!" << std::endl;
-    }
-
+    void add(GiNaC::symbol s);
 
     /**
      * print symbol map
      */
-
-    void print(){
-      for( int i = 0 ; i < map.size() ; i++)
-	std::cout << map[i].first << " " << map[i].second << std::endl;
-    }
+    void print();
 
   };
 
