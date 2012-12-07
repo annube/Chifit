@@ -15,20 +15,13 @@ using namespace GiNaC;
 
 #include "eval.ex.lso.h"
 
-namespace mpi_mq_lso{
+#include "symbols.h"
 
-  symbol aB0("aB_0");
-  symbol af("af");
-  symbol amu_q("a\\mu_q");
-  symbol aLambda3("a\\Lambda_3");
-  symbol aLambda4("a\\Lambda_4");
-  symbol L("L");
-  symbol ZP("Z_P");
-  symbol Dmps("D_{m_{ps}}");
-  symbol Dfps("D_{f_{ps}}");
+namespace chifit{
 
-  ex chi_mu_asq = 2. *  aB0 * amu_q/ZP; 
-  ex xi_ll = chi_mu_asq / pow( 4. * Pi * af , 2. );
+
+  ex chi_mu_asq = 2. *  B * mu/ZP; 
+  ex xi_ll = chi_mu_asq / pow( 4. * Pi * f , 2. );
 
 
 
@@ -48,8 +41,8 @@ namespace mpi_mq_lso{
 
   static ex getampisqXpression(){
     static ex X =  chi_mu_asq * ( 1.
-					   + xi_ll  * log( chi_mu_asq / pow( aLambda3,2.) ) 
-					   + Dmps) * pow(1. + 0.5 * xi_ll * gtilde1( sqrt(
+					   + xi_ll  * log( chi_mu_asq / pow( Lambda3,2.) ) 
+					   + CMpm) * pow(1. + 0.5 * xi_ll * gtilde1( sqrt(
 										 chi_mu_asq ) *  L
 									       ) ,2.) ;
     return X;
@@ -61,10 +54,10 @@ namespace mpi_mq_lso{
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
-    pureParVec.push_back(aB0);
-    pureParVec.push_back(af);
-    pureParVec.push_back(aLambda3);
-    pureParVec.push_back(Dmps);
+    pureParVec.push_back(B);
+    pureParVec.push_back(f);
+    pureParVec.push_back(Lambda3);
+    pureParVec.push_back(CMpm);
 
     vector<double> pureParDimE;
     pureParDimE.push_back(1.);
@@ -80,7 +73,7 @@ namespace mpi_mq_lso{
 
     return    eval_ex_lso(ampisq, /* the expression to work on */
 			  x,par,aargs,deri, /* pass on the parameters from R environment */
-			  amu_q, /* the main regressor appearing in the expression */
+			  mu, /* the main regressor appearing in the expression */
 			  pureParVec,  /* a vector of parameters to optimize for */
 			  pureParDimE,
 			  ssvec   /* a vector of additional regresssor and their name in the aargs list */
@@ -99,9 +92,9 @@ namespace mpi_mq_lso{
 
 
   static ex getafpiXpression(){
-    static ex X = af * ( 1 
-			    - 2. *  xi_ll  * log( chi_mu_asq / pow( aLambda4,2) ) 
-			 + Dfps
+    static ex X = f * ( 1 
+			    - 2. *  xi_ll  * log( chi_mu_asq / pow( Lambda4,2) ) 
+			 + Cf
 			    )
       *
       ( 1. - 2.  * xi_ll * gtilde1( sqrt(  chi_mu_asq ) *  L    ) ) ;
@@ -114,10 +107,10 @@ namespace mpi_mq_lso{
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
-    pureParVec.push_back(aB0);
-    pureParVec.push_back(af);
-    pureParVec.push_back(aLambda4);
-    pureParVec.push_back(Dfps);
+    pureParVec.push_back(B);
+    pureParVec.push_back(f);
+    pureParVec.push_back(Lambda4);
+    pureParVec.push_back(Cf);
 
     vector<double> pureParDimE;
     pureParDimE.push_back(1.);
@@ -134,7 +127,7 @@ namespace mpi_mq_lso{
 
     return    eval_ex_lso(afpi, /* the expression to work on */
 			  x,par,aargs,deri, /* pass on the parameters from R environment */
-			  amu_q, /* the main regressor appearing in the expression */
+			  mu, /* the main regressor appearing in the expression */
 			  pureParVec,  /* a vector of parameters to optimize for */
 			  pureParDimE, /* dimension of parameter in terms of energy */
 			  ssvec   /* a vector of additional regresssor and their name in the aargs list */

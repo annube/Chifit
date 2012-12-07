@@ -34,7 +34,9 @@ typedef std::vector<GiNaC::ex> ExVec;
 typedef ExVec::iterator ExVecIt;
 
 
-double numEvalXPression(ex Xpression,exmap substitutions);
+namespace chifit {
+
+double numEvalXPression(GiNaC::ex Xpression,GiNaC::exmap substitutions);
 
 
 SEXP eval_ex_lso(
@@ -45,7 +47,7 @@ SEXP eval_ex_lso(
 		 SymbolStringVec addRegr,
 		 SymbolVec lsDepPar = SymbolVec(0)
 		 ) ;
-
+};
 
 
 
