@@ -29,8 +29,8 @@ namespace chifit {
   extern  GiNaC::symbol c2;
 
 
-  extern std::vector<GiNaC::symbol> allSymbolsOrdered;
-  extern std::vector<double> allSymbolsOrderedDimensions;
+/*   extern std::vector<GiNaC::symbol> allSymbolsOrdered; */
+/*   extern std::vector<double> allSymbolsOrderedDimensions; */
 
 
   void initAllParamsOrdered();
@@ -78,10 +78,10 @@ namespace chifit {
     ParameterMap(){
       initAllParamsOrdered();
 
-      for( int i = 0 ; i< allSymbolsOrdered.size(); i++ ){
-	map.push_back(std::pair<GiNaC::symbol,bool>(allSymbolsOrdered[i],false));
-	indexMap.insert(std::pair<GiNaC::symbol,int>( allSymbolsOrdered[i] , i ) ) ;
-      }
+/*       for( int i = 0 ; i< allSymbolsOrdered.size(); i++ ){ */
+/* 	map.push_back(std::pair<GiNaC::symbol,bool>(allSymbolsOrdered[i],false)); */
+/* 	indexMap.insert(std::pair<GiNaC::symbol,int>( allSymbolsOrdered[i] , i ) ) ; */
+/*       } */
     }
 
 

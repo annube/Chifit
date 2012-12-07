@@ -109,7 +109,7 @@ namespace chifit {
     for( int p  = 0 ; p < useMap.size() ; p++){
       if( useMap[p].second ) { 
 	pureParVec.push_back( useMap[p].first );
-	pureParDimE.push_back( allSymbolsOrderedDimensions[p] );
+	//	pureParDimE.push_back( allSymbolsOrderedDimensions[p] );
       }
     }
     
