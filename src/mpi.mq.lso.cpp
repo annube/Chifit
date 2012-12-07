@@ -14,14 +14,12 @@ using namespace GiNaC;
 #include "gtilde.h"
 
 #include "eval.ex.lso.h"
-
 #include "symbols.h"
 
 namespace chifit{
 
 
   ex chi_mu_asq = 2. *  B * mu/ZP; 
-  ex xi_ll = chi_mu_asq / pow( 4. * Pi * f , 2. );
 
 
 
@@ -40,6 +38,7 @@ namespace chifit{
 
 
   static ex getampisqXpression(){
+    ex xi_ll = chi_mu_asq / pow( 4. * Pi * f , 2. );
     static ex X =  chi_mu_asq * ( 1.
 					   + xi_ll  * log( chi_mu_asq / pow( Lambda3,2.) ) 
 					   + CMpm) * pow(1. + 0.5 * xi_ll * gtilde1( sqrt(
@@ -92,6 +91,7 @@ namespace chifit{
 
 
   static ex getafpiXpression(){
+    ex xi_ll = chi_mu_asq / pow( 4. * Pi * f , 2. );
     static ex X = f * ( 1 
 			    - 2. *  xi_ll  * log( chi_mu_asq / pow( Lambda4,2) ) 
 			 + Cf
