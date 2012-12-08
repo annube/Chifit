@@ -29,6 +29,9 @@ class M0_sq_ex{public:
   operator GiNaC::ex() const {return sqrt( pow(  2*B*mu/ZP + 2*c2 ,2 ) );}
 };
 
+  extern Mpm_sq_ex Mpm_sq;
+  extern M0_sq_ex M0_sq; 
+
 };
 
 #endif
