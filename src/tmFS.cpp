@@ -123,32 +123,32 @@ namespace chifit{
   }
 
 
-  // RcppExport SEXP evalTMFSE(SEXP par,SEXP mu,SEXP L,SEXP ZP){
-  //   Rcpp::NumericVector vpar(par);
-  //   ParameterMap pm;
+  RcppExport SEXP evalTMFSE(SEXP par,SEXP mu,SEXP L,SEXP ZP){
+    Rcpp::NumericVector vpar(par);
+    ParameterMap pm;
 
-  //   ex X=get_tm_FSE(pm);
-
-
-  //   const SymbolBoolVec & useMap=pm.getMap();
-
-  //   exmap subsmap;
-
-  //   subsmap[chifit::mu] = Rcpp::as<double>(mu);
-  //   subsmap[chifit::L] = Rcpp::as<double>(L);
-  //   subsmap[chifit::ZP] = Rcpp::as<double>(ZP);
-
-  //   for( int p  = 0, lincount= 0; p < useMap.size() ; p++){
-  //     if( useMap[p].second ) { 
-  // 	subsmap[useMap[p].first] = vpar[lincount++];
-  //     }
-  //   }
+    ex X=get_tm_FSE(pm);
 
 
+    const SymbolBoolVec & useMap=pm.getMap();
 
-  //   return Rcpp::wrap( numEvalXPression( X, subsmap));
+    exmap subsmap;
+
+    subsmap[chifit::mu] = Rcpp::as<double>(mu);
+    subsmap[chifit::L] = Rcpp::as<double>(L);
+    subsmap[chifit::ZP] = Rcpp::as<double>(ZP);
+
+    for( int p  = 0, lincount= 0; p < useMap.size() ; p++){
+      if( useMap[p].second ) { 
+  	subsmap[useMap[p].first] = vpar[lincount++];
+      }
+    }
 
 
-  // }
+
+    return Rcpp::wrap( numEvalXPression( X, subsmap));
+
+
+  }
 
 };
