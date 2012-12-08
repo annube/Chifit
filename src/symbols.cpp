@@ -30,48 +30,48 @@ namespace chifit {
 
 
 
-//   std::vector<symbol> allSymbolsOrdered;
-//   std::vector<double> allSymbolsOrderedDimensions;
+   std::vector<symbol> allSymbolsOrdered;
+   std::vector<double> allSymbolsOrderedDimensions;
 
   void initAllParamsOrdered(){
-//     if( allSymbolsOrdered.size() == 0 ){
-//       allSymbolsOrdered.push_back(B);
-//       allSymbolsOrderedDimensions.push_back(1);
+    if( allSymbolsOrdered.size() == 0 ){
+      allSymbolsOrdered.push_back(B);
+      allSymbolsOrderedDimensions.push_back(1);
 
-//       allSymbolsOrdered.push_back(f);
-//       allSymbolsOrderedDimensions.push_back(1);
-
-
-//       allSymbolsOrdered.push_back(c2);
-//       allSymbolsOrderedDimensions.push_back(4);
+      allSymbolsOrdered.push_back(f);
+      allSymbolsOrderedDimensions.push_back(1);
 
 
-//       allSymbolsOrdered.push_back(Lambda1);
-//       allSymbolsOrderedDimensions.push_back(1);
-
-//       allSymbolsOrdered.push_back(Lambda2);
-//       allSymbolsOrderedDimensions.push_back(1);
+      allSymbolsOrdered.push_back(c2);
+      allSymbolsOrderedDimensions.push_back(4);
 
 
-//       allSymbolsOrdered.push_back(Lambda3);
-//       allSymbolsOrderedDimensions.push_back(1);
+      allSymbolsOrdered.push_back(Lambda1);
+      allSymbolsOrderedDimensions.push_back(1);
 
-//       allSymbolsOrdered.push_back(Lambda4);
-//       allSymbolsOrderedDimensions.push_back(1);
+      allSymbolsOrdered.push_back(Lambda2);
+      allSymbolsOrderedDimensions.push_back(1);
 
-//       allSymbolsOrdered.push_back(Xi3);
-//       allSymbolsOrderedDimensions.push_back(1);
 
-//       allSymbolsOrdered.push_back(CMpm);
-//       allSymbolsOrderedDimensions.push_back(2);
+      allSymbolsOrdered.push_back(Lambda3);
+      allSymbolsOrderedDimensions.push_back(1);
 
-//       allSymbolsOrdered.push_back(Cf);
-//       allSymbolsOrderedDimensions.push_back(2);
+      allSymbolsOrdered.push_back(Lambda4);
+      allSymbolsOrderedDimensions.push_back(1);
 
-//       allSymbolsOrdered.push_back(CM0);
-//       allSymbolsOrderedDimensions.push_back(2);
+      allSymbolsOrdered.push_back(Xi3);
+      allSymbolsOrderedDimensions.push_back(1);
 
-//     }
+      allSymbolsOrdered.push_back(CMpm);
+      allSymbolsOrderedDimensions.push_back(2);
+
+      allSymbolsOrdered.push_back(Cf);
+      allSymbolsOrderedDimensions.push_back(2);
+
+      allSymbolsOrdered.push_back(CM0);
+      allSymbolsOrderedDimensions.push_back(2);
+
+    }
   }
 
 
@@ -94,10 +94,10 @@ namespace chifit {
   ParameterMap::ParameterMap(){
       initAllParamsOrdered();
 
-/*       for( int i = 0 ; i< allSymbolsOrdered.size(); i++ ){ */
-/* 	map.push_back(std::pair<GiNaC::symbol,bool>(allSymbolsOrdered[i],false)); */
-/* 	indexMap.insert(std::pair<GiNaC::symbol,int>( allSymbolsOrdered[i] , i ) ) ; */
-/*       } */
+      for( int i = 0 ; i< allSymbolsOrdered.size(); i++ ){
+	map.push_back(std::pair<GiNaC::symbol,bool>(allSymbolsOrdered[i],false));
+	indexMap.insert(std::pair<GiNaC::symbol,int>( allSymbolsOrdered[i] , i ) ) ;
+      }
     }
 
 

@@ -29,8 +29,8 @@ namespace chifit {
   extern  GiNaC::symbol c2;
 
 
-/*   extern std::vector<GiNaC::symbol> allSymbolsOrdered; */
-/*   extern std::vector<double> allSymbolsOrderedDimensions; */
+  extern std::vector<GiNaC::symbol> allSymbolsOrdered;
+  extern std::vector<double> allSymbolsOrderedDimensions;
 
 
   void initAllParamsOrdered();
