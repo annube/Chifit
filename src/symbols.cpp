@@ -86,6 +86,7 @@ namespace chifit {
 	return map[ itFound->second ].second;
       else
 	std::cerr << "Error in ParameterMap::parUsed : symbol "<< s <<" not in global symbol table !!" << std::endl;
+      return false;
     }
 
 
