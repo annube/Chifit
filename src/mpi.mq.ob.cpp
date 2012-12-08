@@ -19,13 +19,25 @@ using namespace GiNaC;
 
 
 
+
+
 /* we need a namespace here because the same symbols as below are defined in mpi.mq.cpp as well */
 namespace chifit {
 
+class Mpm_sq_ex{public: 
+    Mpm_sq_ex(){} 
+  operator GiNaC::ex() const {return 2*B*mu/ZP;}
+};
+
+class M0_sq_ex{public: 
+    M0_sq_ex(){} 
+  operator GiNaC::ex() const {return sqrt( pow(  2*B*mu/ZP + 2*c2 ,2 ) );}
+};
 
 
-  ex Mpm_sq = 2*B*mu/ZP; 
-  ex M0_sq = sqrt( pow(  2*B*mu/ZP + 2*c2 ,2 ) ); 
+
+  Mpm_sq_ex Mpm_sq;
+  M0_sq_ex M0_sq; 
 
 
   ex get_M_pm_sq_Xpression(ParameterMap & pm ){
