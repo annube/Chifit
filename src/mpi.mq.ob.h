@@ -14,9 +14,9 @@
 
 namespace chifit {
 
-  GiNaC::ex get_M_pm_sq_Xpression(ParameterMap &pm);
-  GiNaC::ex get_M_0_sq_Xpression();
-  GiNaC::ex get_f_pm_Xpression();
+  GiNaC::ex get_M_pm_sq_Xpression(ParameterMap &pm,bool withFS=true);
+  GiNaC::ex get_M_0_sq_Xpression(ParameterMap &pm,bool withFS=true);
+  GiNaC::ex get_f_pm_Xpression(ParameterMap &pm,bool withFS=true);
 
 
 class Mpm_sq_ex{public: 

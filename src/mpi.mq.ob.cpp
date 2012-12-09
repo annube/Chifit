@@ -40,10 +40,12 @@ namespace chifit {
   M0_sq_ex M0_sq; 
 
 
-  ex get_M_pm_sq_Xpression(ParameterMap & pm ){
+  ex get_M_pm_sq_Xpression(ParameterMap & pm , bool withFS /* =true */ ){
     static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
     static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
-    static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_M0 ;
+    static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  )  ;
+
+    static ex X_FSE = (  Mpm_sq * ( 1. + xi_0 * ( log_M0_L3 + fse_log_corr_M0 )+ CMpm ) ) ; 
 
     static ex X = (  Mpm_sq * ( 1. + xi_0 * log_M0_L3 + CMpm ) ) ; 
 
@@ -53,39 +55,58 @@ namespace chifit {
     pm.add( Lambda3 );
     pm.add( CMpm );
 
+    if(withFS)
+      return X_FSE;
+    else
+      return X;
 
-    return X;
+
   }
 
 
-  ex get_M_0_sq_Xpression(){
+  ex get_M_0_sq_Xpression(ParameterMap &pm,bool withFS){
 
     static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
     static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
-    static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_M0 ;
+    static ex log_M0_L3 = log( M0_sq / pow( Lambda3 , 2 )  ) ;
 
     static ex xi_pm  = Mpm_sq/ pow( 4. * Pi * f , 2 );
     static ex fse_log_corr_Mpm  = gtilde1( sqrt( Mpm_sq ) *  L );
-    static ex log_Mpm_L3 = log( Mpm_sq / pow( Lambda3 , 2 )  ) + fse_log_corr_Mpm ;
+    static ex log_Mpm_L3 = log( Mpm_sq / pow( Lambda3 , 2 )  )  ;
 
-    static ex log_M0_X3 = log( M0_sq / pow( Xi3 , 2 )  ) + fse_log_corr_M0 ;
+    static ex log_M0_X3 = log( M0_sq / pow( Xi3 , 2 )  )  ;
+
+    static ex X_FSE =   Mpm_sq * ( 1. +2.*xi_pm * ( log_Mpm_L3 + fse_log_corr_Mpm ) - xi_0 * ( log_M0_L3 +  + fse_log_corr_M0 )) 
+      + 2 * c2 *( 1 - 4. * xi_0 * ( log_M0_X3 + fse_log_corr_M0) + CM0); 
 
     static ex X =   Mpm_sq * ( 1. +2.*xi_pm * log_Mpm_L3 - xi_0 * log_M0_L3 ) 
       + 2 * c2 *( 1 - 4. * xi_0 * log_M0_X3 + CM0); 
-    return X;
+
+    if( withFS )
+      return X_FSE;
+    else
+      return X;
+
   }
 
 
-  ex get_f_pm_Xpression(){
+  ex get_f_pm_Xpression(ParameterMap &pm,bool withFS){
     static ex xi_pm = Mpm_sq/ pow( 4. * Pi * f , 2 );
     static ex xi_0  = M0_sq/ pow( 4. * Pi * f , 2 );
     static ex fse_log_corr_Mpm = gtilde1( sqrt( Mpm_sq ) *  L );
     static ex fse_log_corr_M0  = gtilde1( sqrt( M0_sq ) *  L );
-    static ex log_M0_L4 = log( M0_sq / pow( Lambda4 , 2 )  ) + fse_log_corr_M0;
-    static ex log_Mpm_L4 = log( Mpm_sq / pow( Lambda4 , 2 ) ) + fse_log_corr_Mpm;
+    static ex log_M0_L4 = log( M0_sq / pow( Lambda4 , 2 )  );
+    static ex log_Mpm_L4 = log( Mpm_sq / pow( Lambda4 , 2 ) );
+
+    static ex X_FSE =  f * ( 1. - ( xi_pm * ( log_Mpm_L4 + fse_log_corr_Mpm ) + xi_0 * (  log_M0_L4  + fse_log_corr_M0 ) ) + Cf ) ;
 
     static ex X =  f * ( 1. - ( xi_pm * log_Mpm_L4 + xi_0 * log_M0_L4 ) + Cf ) ;
-    return X;
+
+    if( withFS )
+      return X_FSE;
+    else
+      return X;
+
   }
 
 
@@ -160,7 +181,8 @@ namespace chifit {
    **************************/
 
   RcppExport SEXP mpi_0_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
-    static  ex mpisq = get_M_0_sq_Xpression();
+    ParameterMap pm;
+    static  ex mpisq = get_M_0_sq_Xpression(pm);
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
@@ -203,7 +225,8 @@ namespace chifit {
    **************************/
 
   RcppExport SEXP fpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
-    static  ex fpisq = get_f_pm_Xpression();
+    ParameterMap pm;
+    static  ex fpisq = get_f_pm_Xpression(pm);
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
