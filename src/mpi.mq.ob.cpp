@@ -180,7 +180,7 @@ namespace chifit {
    *
    **************************/
 
-  RcppExport SEXP mpi_0_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
+  RcppExport SEXP mpi_0_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE, SEXP fitZP) {
     ParameterMap pm;
     static  ex mpisq = get_M_0_sq_Xpression(pm);
 
@@ -202,15 +202,22 @@ namespace chifit {
 
     /* additional regressors besides the main regressor */
     SymbolStringVec ssvec;
+    SymbolVec lsDepPar;
     ssvec.push_back( SymbolStringPair( &L , "L" ) );
-    ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+
+    if( ! Rcpp::as<bool>(fitZP) )
+      ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+    else      
+      lsDepPar.push_back(ZP);
+
 
     return    eval_ex_lso(mpisq, /* the expression to work on */
 			  x,par,aargs,deri, /* pass on the parameters from R environment */
 			  mu, /* the main regressor appearing in the expression */
 			  pureParVec,  /* a vector of parameters to optimize for */
 			  pureParDimE,
-			  ssvec   /* a vector of additional regresssor and their name in the aargs list */
+			  ssvec,   /* a vector of additional regresssor and their name in the aargs list */
+			  lsDepPar
 			  );
   }
 
@@ -224,7 +231,7 @@ namespace chifit {
    *
    **************************/
 
-  RcppExport SEXP fpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
+  RcppExport SEXP fpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri, SEXP FSE, SEXP fitZP) {
     ParameterMap pm;
     static  ex fpisq = get_f_pm_Xpression(pm);
 
@@ -245,15 +252,21 @@ namespace chifit {
 
     /* additional regressors besides the main regressor */
     SymbolStringVec ssvec;
+    SymbolVec lsDepPar;
     ssvec.push_back( SymbolStringPair( &L , "L" ) );
-    ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+
+    if( ! Rcpp::as<bool>(fitZP) )
+      ssvec.push_back( SymbolStringPair( &ZP , "ZP" ) );
+    else      
+      lsDepPar.push_back(ZP);
 
     return    eval_ex_lso(fpisq, /* the expression to work on */
 			  x,par,aargs,deri, /* pass on the parameters from R environment */
 			  mu, /* the main regressor appearing in the expression */
 			  pureParVec,  /* a vector of parameters to optimize for */
 			  pureParDimE,
-			  ssvec   /* a vector of additional regresssor and their name in the aargs list */
+			  ssvec,   /* a vector of additional regresssor and their name in the aargs list */
+			  lsDepPar
 			  );
   }
 

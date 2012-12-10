@@ -78,7 +78,8 @@ namespace chifit{
    **************************/
 
   RcppExport SEXP fpi_mq_ob_zp(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
-    static  ex fpisq = get_f_pm_Xpression();
+    ParameterMap pm;
+    static  ex fpisq = get_f_pm_Xpression(pm);
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
@@ -126,7 +127,8 @@ namespace chifit{
    **************************/
 
   RcppExport SEXP mpi_0_mq_ob_zp(SEXP x, SEXP par,SEXP aargs,SEXP deri) {
-    static  ex mpisq = get_M_0_sq_Xpression();
+    ParameterMap pm;
+    static  ex mpisq = get_M_0_sq_Xpression(pm);
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
