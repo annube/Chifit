@@ -1,5 +1,7 @@
 
 #include <vector>
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -14,11 +16,16 @@ using namespace Rcpp;
 namespace chifit {
 
 
-SEXP mpi_mq_gen(ExGenFN getEx,SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE,SEXP fitZP) {
+  SEXP mpi_mq_gen(ExGenFN getEx,SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP fitZP,ExGenFNFSE fseFN) {
 
-ParameterMap pm;
+    ParameterMap pm;
 
-GiNaC::ex mpisq = getEx(pm,true);
+    GiNaC::ex mpisq;
+
+    if(fseFN == NULL) 
+      mpisq = getEx(pm,true);
+    else
+      mpisq = getEx(pm,false)*fseFN(pm);
 
 //    pm.print();
 
@@ -34,6 +41,7 @@ GiNaC::ex mpisq = getEx(pm,true);
 
     for( int p  = 0 ; p < useMap.size() ; p++){
       if( useMap[p].second ) { 
+	//	cout <<  useMap[p].first << endl ;
 	pureParVec.push_back( useMap[p].first );
 	pureParDimE.push_back( allSymbolsOrderedDimensions[p] );
       }

@@ -10,6 +10,7 @@
 namespace chifit{
 
   GiNaC::ex get_tm_FSE(ParameterMap & pm);
+  GiNaC::ex get_tm_FSE_Mpm_sq ( ParameterMap & pm);
 
 }
 

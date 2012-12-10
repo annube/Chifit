@@ -125,7 +125,13 @@ namespace chifit {
 
 
   RcppExport SEXP mpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE,SEXP fitZP) {
-    return mpi_mq_gen(&get_M_pm_sq_Xpression,x,par,aargs,deri,FSE,fitZP);
+
+    switch( Rcpp::as<int>( FSE ) ){
+    case 0:      return mpi_mq_gen(&get_M_pm_sq_Xpression,x,par,aargs,deri,fitZP); break;
+    case 1:      return mpi_mq_gen(&get_M_pm_sq_Xpression,x,par,aargs,deri,fitZP,&get_tm_FSE_Mpm_sq); break;
+    default: cout << "error: FSE argument has to be 0 (NLO FSE) or 1 (twisted mass FSE)" << endl; break;
+    }
+    return Rcpp::wrap( NAN );
   }
 
 
@@ -138,8 +144,14 @@ namespace chifit {
    *
    **************************/
 
-  RcppExport SEXP mpi_0_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE, SEXP fitZP) {
-    return mpi_mq_gen(&get_M_0_sq_Xpression,x,par,aargs,deri,FSE,fitZP);
+  RcppExport SEXP mpi_0_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE,SEXP fitZP) {
+
+    switch( Rcpp::as<int>( FSE ) ){
+    case 0:      return mpi_mq_gen(&get_M_0_sq_Xpression,x,par,aargs,deri,fitZP); break;
+    case 1:      return mpi_mq_gen(&get_M_0_sq_Xpression,x,par,aargs,deri,fitZP,NULL); break; // -> not implemented
+    default: cout << "error: FSE argument has to be 0 (NLO FSE) or 1 (twisted mass FSE)" << endl; break;
+    }
+    return Rcpp::wrap( NAN );
   }
 
 
@@ -153,8 +165,16 @@ namespace chifit {
    **************************/
 
   RcppExport SEXP fpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri, SEXP FSE, SEXP fitZP) {
-    return mpi_mq_gen(&get_f_pm_Xpression,x,par,aargs,deri,FSE,fitZP);
+
+    switch( Rcpp::as<int>( FSE ) ){
+    case 0:      return mpi_mq_gen(&get_f_pm_Xpression,x,par,aargs,deri,fitZP); break;
+    case 1:      return mpi_mq_gen(&get_f_pm_Xpression,x,par,aargs,deri,fitZP,NULL); break;  // -->> not implemented so far
+    default: cout << "error: FSE argument has to be 0 (NLO FSE) or 1 (twisted mass FSE)" << endl; break;
+    }
+    return Rcpp::wrap( NAN );
   }
+
+
 
 
 

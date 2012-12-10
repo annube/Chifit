@@ -24,7 +24,7 @@ using namespace GiNaC;
 
 namespace chifit{
 
-  ex get_tm_FSE(ParameterMap & pm){
+  ex get_tm_FSE_Rpm(ParameterMap & pm){
     ex lambda_pm=sqrt( Mpm_sq ) *  L;
     ex lambda_0=sqrt( M0_sq ) *  L;
 
@@ -123,11 +123,20 @@ namespace chifit{
   }
 
 
+  /**
+   * this function calculates the factor due to FSE's for the SQUARED charged pion mass
+   */
+
+  ex get_tm_FSE_Mpm_sq ( ParameterMap & pm){
+    return pow( ( 1 + get_tm_FSE_Rpm(pm) ) , 2 );
+  }
+
+
   RcppExport SEXP evalTMFSE(SEXP par,SEXP mu,SEXP L,SEXP ZP){
     Rcpp::NumericVector vpar(par);
     ParameterMap pm;
 
-    ex X=get_tm_FSE(pm);
+    ex X=get_tm_FSE_Rpm(pm);
 
 
     const SymbolBoolVec & useMap=pm.getMap();
