@@ -14,7 +14,7 @@ using namespace Rcpp;
 namespace chifit {
 
 
-RcppExport SEXP mpi_mq_gen(ExGenFN getEx,SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE,SEXP fitZP) {
+SEXP mpi_mq_gen(ExGenFN getEx,SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE,SEXP fitZP) {
 
 ParameterMap pm;
 
