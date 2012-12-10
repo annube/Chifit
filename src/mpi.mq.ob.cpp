@@ -82,6 +82,13 @@ namespace chifit {
     static ex X =   Mpm_sq * ( 1. +2.*xi_pm * log_Mpm_L3 - xi_0 * log_M0_L3 ) 
       + 2 * c2 *( 1 - 4. * xi_0 * log_M0_X3 + CM0); 
 
+    pm.add( B );
+    pm.add( f );
+    pm.add( c2 );
+    pm.add( Lambda3 );
+    pm.add( Xi3 );
+    pm.add( CM0 );
+
     if( withFS )
       return X_FSE;
     else
@@ -101,6 +108,12 @@ namespace chifit {
     static ex X_FSE =  f * ( 1. - ( xi_pm * ( log_Mpm_L4 + fse_log_corr_Mpm ) + xi_0 * (  log_M0_L4  + fse_log_corr_M0 ) ) + Cf ) ;
 
     static ex X =  f * ( 1. - ( xi_pm * log_Mpm_L4 + xi_0 * log_M0_L4 ) + Cf ) ;
+
+    pm.add( B );
+    pm.add( f );
+    pm.add( c2 );
+    pm.add( Lambda4 );
+    pm.add( Cf );
 
     if( withFS )
       return X_FSE;
@@ -182,20 +195,24 @@ namespace chifit {
 
   RcppExport SEXP mpi_0_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP FSE, SEXP fitZP) {
     ParameterMap pm;
-    static  ex mpisq = get_M_0_sq_Xpression(pm);
+    ex mpisq = get_M_0_sq_Xpression(pm);
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
     vector<double> pureParDimE;
 
     /* the parameters to be fitted and their energy dimension */
+    /* they will be autagically selected by the expression generating function */
 
-    pureParVec.push_back(B);       pureParDimE.push_back(1.);
-    pureParVec.push_back(f);       pureParDimE.push_back(1.);
-    pureParVec.push_back(c2);      pureParDimE.push_back(4.);
-    pureParVec.push_back(Lambda3); pureParDimE.push_back(1.);
-    pureParVec.push_back(Xi3);     pureParDimE.push_back(1.);
-    pureParVec.push_back(CM0);    pureParDimE.push_back(2.);
+    const SymbolBoolVec & useMap=pm.getMap();
+
+
+    for( int p  = 0 ; p < useMap.size() ; p++){
+      if( useMap[p].second ) { 
+	pureParVec.push_back( useMap[p].first );
+	pureParDimE.push_back( allSymbolsOrderedDimensions[p] );
+      }
+    }
 
     
 
@@ -233,7 +250,7 @@ namespace chifit {
 
   RcppExport SEXP fpi_mq_ob(SEXP x, SEXP par,SEXP aargs,SEXP deri, SEXP FSE, SEXP fitZP) {
     ParameterMap pm;
-    static  ex fpisq = get_f_pm_Xpression(pm);
+    ex fpisq = get_f_pm_Xpression(pm);
 
     /* the main parameters to optimize for */
     SymbolVec pureParVec;
@@ -241,13 +258,16 @@ namespace chifit {
 
     /* the parameters to be fitted and their energy dimension */
 
-    pureParVec.push_back(B);       pureParDimE.push_back(1.);
-    pureParVec.push_back(f);       pureParDimE.push_back(1.);
-    pureParVec.push_back(c2);      pureParDimE.push_back(4.);
-    pureParVec.push_back(Lambda4); pureParDimE.push_back(1.);
-    pureParVec.push_back(Cf);      pureParDimE.push_back(2.);
+    const SymbolBoolVec & useMap=pm.getMap();
 
-    
+
+    for( int p  = 0 ; p < useMap.size() ; p++){
+      if( useMap[p].second ) { 
+	pureParVec.push_back( useMap[p].first );
+	pureParDimE.push_back( allSymbolsOrderedDimensions[p] );
+      }
+    }
+
 
 
     /* additional regressors besides the main regressor */
