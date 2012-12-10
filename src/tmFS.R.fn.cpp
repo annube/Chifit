@@ -27,6 +27,7 @@ using namespace GiNaC;
 
 
 #include "utils.h"
+#include "tmFS.R.g.h"
 #include "tmFS.R.fn.h"
 #include "gtilde.partitions.h"
 
@@ -48,16 +49,6 @@ typedef struct R_Integrand_Params_ {
 
 
 } R_Integrand_Params;
-
-
-complex<double> R_sigma(complex<double> z){
-  return sqrt(1.-4./z);
-}
-
-complex<double> R_g(complex<double> z){
-  return R_sigma(z) * log( ( R_sigma(z) - 1. ) / ( R_sigma(z) + 1. ) ) + 2.;
-}
-
 
 
 double R_integrand(double y, void *params){
