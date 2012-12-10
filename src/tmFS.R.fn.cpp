@@ -63,13 +63,13 @@ double R_integrand(double y, void *params){
       pow(y,sp->k)
       * exp( -sp->x * sqrt( 1. + y * y )  )
       *
-      R_g( complex<double>(2.,2.*sp->r*y) ).real();
+      chifit::R_g( complex<double>(2.,2.*sp->r*y) ).real();
   } else {
     return 
       pow(y,sp->k)
       * exp( -sp->x * sqrt( 1. + y * y )  )
       *
-      R_g( complex<double>(2.,2.*sp->r*y) ).imag();
+      chifit::R_g( complex<double>(2.,2.*sp->r*y) ).imag();
   }
     
 }
