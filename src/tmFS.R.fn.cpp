@@ -27,7 +27,7 @@ using namespace GiNaC;
 
 
 #include "utils.h"
-#include "tmFS.R.g.h"
+#include "tmFS.R.g.fn.h"
 #include "tmFS.R.fn.h"
 #include "gtilde.partitions.h"
 
@@ -50,8 +50,6 @@ typedef struct R_Integrand_Params_ {
 
 } R_Integrand_Params;
 
-#include "tmFS.R.g.icpp"
-
 double R_integrand(double y, void *params){
   //  static int fnEvalCount=0;
   R_Integrand_Params *sp=(R_Integrand_Params *)params;
@@ -64,13 +62,13 @@ double R_integrand(double y, void *params){
       pow(y,sp->k)
       * exp( -sp->x * sqrt( 1. + y * y )  )
       *
-      chifit::R_g_d0( complex<double>(2.,2.*sp->r*y) ).real();
+      chifit::R_g( complex<double>(2.,2.*sp->r*y) ).real();
   } else {
     return 
       pow(y,sp->k)
       * exp( -sp->x * sqrt( 1. + y * y )  )
       *
-      chifit::R_g_d0( complex<double>(2.,2.*sp->r*y) ).imag();
+      chifit::R_g( complex<double>(2.,2.*sp->r*y) ).imag();
   }
     
 }
