@@ -43,12 +43,6 @@ using namespace GiNaC;
  *
  *********************/
 
-typedef struct R_Integrand_Params_ {
-  int k,n;
-  double x,r;
-
-
-} R_Integrand_Params;
 
 double R_integrand(double y, void *params){
   //  static int fnEvalCount=0;
@@ -183,11 +177,6 @@ RcppExport SEXP tmFS_R_fn_R(SEXP x,SEXP k, SEXP r){
   return wrap( eval_tmFS_R(as<double>(x),as<int>(k), as<double>(r) ) );
 }
 
-RcppExport SEXP tmFS_R_dx_fn_R(SEXP x,SEXP k, SEXP r){
-  return wrap( eval_tmFS_R(as<double>(x),as<int>(k), as<double>(r),&R_integrand_dx ) );
-}
-
-
 
 ex eval_tmFS_R_fn(const ex &x,const ex & k , const ex & r){
   if( is_a<numeric>(k) ) 
@@ -228,12 +217,17 @@ RcppExport SEXP tmFS_R_fn_R_ginac(SEXP x,SEXP k, SEXP r){
 }
 
 
+// derivative w.r.t. x
+
+RcppExport SEXP tmFS_R_dx_fn_R(SEXP x,SEXP k, SEXP r){
+  return wrap( eval_tmFS_R(as<double>(x),as<int>(k), as<double>(r),&R_integrand_dx ) );
+}
 
 ex eval_tmFS_R_dx_fn(const ex &x,const ex & k , const ex & r){
   if( is_a<numeric>(k) ) 
-    return tmFS_R(x,ex_to<numeric>(k).to_int(),r).hold();
+    return tmFS_R_dx(x,ex_to<numeric>(k).to_int(),r).hold();
   else 
-    return tmFS_R(x,k,r).hold();
+    return tmFS_R_dx(x,k,r).hold();
 }
 
 
@@ -247,7 +241,37 @@ ex evalf_tmFS_R_dx_fn(const ex &x,const ex & k , const ex & r){
 		      &R_integrand_dx
 		      ) ;
   } else {
-    return tmFS_R(x,k,r).hold();
+    return tmFS_R_dx(x,k,r).hold();
+  }
+}
+
+
+// derivative w.r.t. r
+
+
+RcppExport SEXP tmFS_R_dr_fn_R(SEXP x,SEXP k, SEXP r){
+  return wrap( eval_tmFS_R(as<double>(x),as<int>(k), as<double>(r),&R_integrand_dr ) );
+}
+
+ex eval_tmFS_R_dr_fn(const ex &x,const ex & k , const ex & r){
+  if( is_a<numeric>(k) ) 
+    return tmFS_R_dr(x,ex_to<numeric>(k).to_int(),r).hold();
+  else 
+    return tmFS_R_dr(x,k,r).hold();
+}
+
+
+ex evalf_tmFS_R_dr_fn(const ex &x,const ex & k , const ex & r){
+  if( is_a<numeric>(x) &&  is_a<numeric>(k) && is_a<numeric>(r) ) {
+
+    return eval_tmFS_R(
+		      ex_to<numeric>(x).to_double(),
+		      MyExToInt( k ),
+		      ex_to<numeric>(r).to_double(),
+		      &R_integrand_dr
+		      ) ;
+  } else {
+    return tmFS_R_dr(x,k,r).hold();
   }
 }
 
@@ -263,4 +287,9 @@ REGISTER_FUNCTION(tmFS_R,
 REGISTER_FUNCTION(tmFS_R_dx,
 		  eval_func(eval_tmFS_R_dx_fn).
 		  evalf_func(evalf_tmFS_R_dx_fn)
+		  );
+
+REGISTER_FUNCTION(tmFS_R_dr,
+		  eval_func(eval_tmFS_R_dr_fn).
+		  evalf_func(evalf_tmFS_R_dr_fn)
 		  );
