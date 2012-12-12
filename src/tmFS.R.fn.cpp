@@ -73,12 +73,58 @@ double R_integrand(double y, void *params){
     
 }
 
+double R_integrand_dx(double y, void *params){
+  //  static int fnEvalCount=0;
+  R_Integrand_Params *sp=(R_Integrand_Params *)params;
+  //  ++fnEvalCount;
+  //  cout << fnEvalCount << endl;
+
+
+  if( sp->k % 2 == 0 ){
+    return 
+      - pow(y,sp->k) * sqrt( 1. + y * y )
+      * exp( -sp->x * sqrt( 1. + y * y )  )
+      *
+      chifit::R_g( complex<double>(2.,2.*sp->r*y) ).real();
+  } else {
+    return 
+      - pow(y,sp->k) * sqrt( 1. + y * y )
+      * exp( -sp->x * sqrt( 1. + y * y )  )
+      *
+      chifit::R_g( complex<double>(2.,2.*sp->r*y) ).imag();
+  }
+    
+}
+
+double R_integrand_dr(double y, void *params){
+  //  static int fnEvalCount=0;
+  R_Integrand_Params *sp=(R_Integrand_Params *)params;
+  //  ++fnEvalCount;
+  //  cout << fnEvalCount << endl;
+
+
+  if( sp->k % 2 == 0 ){
+    return 
+      pow(y,sp->k) 
+      * exp( -sp->x * sqrt( 1. + y * y )  )
+      *
+      ( chifit::R_dg( complex<double>(2.,2.*sp->r*y) ) * complex<double>(0,2*y) ).real();
+  } else {
+    return 
+      pow(y,sp->k)
+      * exp( -sp->x * sqrt( 1. + y * y )  )
+      *
+      ( chifit::R_dg( complex<double>(2.,2.*sp->r*y) ) * complex<double>(0,2*y) ).imag();
+  }
+    
+}
+
 
 //this is the implementation of the R function devided by r_i^(k+1) with the r_i substituted out of the exponent
 // to get the correct R function you have to multiply this function with r_i^(k+1) !!!
 
 
-double eval_tmFS_R(double x,int k,double r){
+double eval_tmFS_R(double x,int k,double r,IntegrandFN integrand=&R_integrand){
 
 //   cout << "k = " << (k) << endl
 //        << "x = " << (x) << endl
@@ -97,7 +143,7 @@ double eval_tmFS_R(double x,int k,double r){
     w = gsl_integration_workspace_alloc(WS_SIZE);
 
   gsl_function F;
-  F.function = &R_integrand;
+  F.function = integrand;
   F.params = &rip;
 
 
@@ -146,7 +192,6 @@ ex eval_tmFS_R_fn(const ex &x,const ex & k , const ex & r){
 }
 
 
-
 ex evalf_tmFS_R_fn(const ex &x,const ex & k , const ex & r){
   if( is_a<numeric>(x) &&  is_a<numeric>(k) && is_a<numeric>(r) ) {
 
@@ -170,7 +215,37 @@ RcppExport SEXP tmFS_R_fn_R_ginac(SEXP x,SEXP k, SEXP r){
 
 
 
+ex evalf_tmFS_R_dx_fn(const ex &x,const ex & k , const ex & r){
+  if( is_a<numeric>(x) &&  is_a<numeric>(k) && is_a<numeric>(r) ) {
+
+    return eval_tmFS_R(
+		      ex_to<numeric>(x).to_double(),
+		      MyExToInt( k ),
+		      ex_to<numeric>(r).to_double()
+		      ) ;
+  } else {
+    return tmFS_R(x,k,r).hold();
+  }
+}
+
+
+
+ex eval_tmFS_R_dx_fn(const ex &x,const ex & k , const ex & r){
+  if( is_a<numeric>(k) ) 
+    return tmFS_R(x,ex_to<numeric>(k).to_int(),r).hold();
+  else 
+    return tmFS_R(x,k,r).hold();
+}
+
+
+
+
 REGISTER_FUNCTION(tmFS_R,
 		  eval_func(eval_tmFS_R_fn).
 		  evalf_func(evalf_tmFS_R_fn)
+		  );
+
+REGISTER_FUNCTION(tmFS_R_dx,
+		  eval_func(eval_tmFS_R_dx_fn).
+		  evalf_func(evalf_tmFS_R_dx_fn)
 		  );

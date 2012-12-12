@@ -7,6 +7,10 @@
 
 using namespace GiNaC;
 
+typedef double (*IntegrandFN)(double,void*) ;
+
 DECLARE_FUNCTION_3P(tmFS_R);
+DECLARE_FUNCTION_3P(tmFS_R_dx);
+//DECLARE_FUNCTION_3P(tmFS_R_dr);
 
 #endif
