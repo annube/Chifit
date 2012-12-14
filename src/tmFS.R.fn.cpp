@@ -118,7 +118,7 @@ double R_integrand_dr(double y, void *params){
 // to get the correct R function you have to multiply this function with r_i^(k+1) !!!
 
 
-double eval_tmFS_R(double x,int k,double r,IntegrandFN integrand=&R_integrand){
+double eval_tmFS_R(double x,int k,double r,IntegrandFN integrand /* = &R_integrand */){
 
 //   cout << "k = " << (k) << endl
 //        << "x = " << (x) << endl
@@ -189,7 +189,7 @@ ex eval_tmFS_R_fn_deri(const ex &x,const ex & k , const ex & r,unsigned diffpar)
   if(diffpar == 0 )
     return tmFS_R_dx(x,k,r);
   else if( diffpar == 2 ){
-    cout << "Warning derivative of R w.r.t. r not implemented so far " << endl;
+    return tmFS_R_dr(x,k,r);
   } else {
     cerr << "Error : R can only be derived w.r.t. x and r " << endl;
   }

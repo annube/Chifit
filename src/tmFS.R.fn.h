@@ -14,6 +14,12 @@ typedef struct R_Integrand_Params_ {
   double x,r;
 } R_Integrand_Params;
 
+
+double R_integrand(double y, void *params);
+
+
+double eval_tmFS_R(double x,int k,double r,IntegrandFN integrand=&R_integrand);
+
 DECLARE_FUNCTION_3P(tmFS_R);
 DECLARE_FUNCTION_3P(tmFS_R_dx);
 DECLARE_FUNCTION_3P(tmFS_R_dr);
