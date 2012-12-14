@@ -128,7 +128,8 @@ namespace chifit {
 
     switch( Rcpp::as<int>( FSE ) ){
     case 0:      return mpi_mq_gen(&get_M_pm_sq_Xpression,x,par,aargs,deri,fitZP); break;
-    case 1:      return mpi_mq_gen(&get_M_pm_sq_Xpression,x,par,aargs,deri,fitZP,&get_tm_FSE_Mpm_sq); break;
+    case 1:   cout << "Using twisted mass FS FX !!! " << endl;
+      return mpi_mq_gen(&get_M_pm_sq_Xpression,x,par,aargs,deri,fitZP,&get_tm_FSE_Mpm_sq); break;
     default: cout << "error: FSE argument has to be 0 (NLO FSE) or 1 (twisted mass FSE)" << endl; break;
     }
     return Rcpp::wrap( NAN );
