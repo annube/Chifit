@@ -11,5 +11,7 @@ using namespace GiNaC;
 
 DECLARE_FUNCTION_2P(B2k_0);
 
+DECLARE_FUNCTION_2P(B2k_0_deri);
+
 
 #endif
