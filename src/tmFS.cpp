@@ -128,7 +128,7 @@ namespace chifit{
    */
 
   ex get_tm_FSE_Mpm_sq ( ParameterMap & pm){
-    return pow( ( 1 + get_tm_FSE_Rpm(pm) ) , 2 );
+    return ( 1 + 2.*get_tm_FSE_Rpm(pm) );
   }
 
 

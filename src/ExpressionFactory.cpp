@@ -15,6 +15,7 @@ using namespace Rcpp;
 #include "symbols.h"
 #include "mpi.mq.ob.h"
 #include "tmFS.h"
+#include "mpi.mq.ob.fse.h"
 #include "ExpressionFactory.h"
 
 
@@ -42,7 +43,16 @@ namespace chifit {
 
     if( quant == "mpi.mq.ob" ){
       ParameterMap pm;
+
       XMap[id] = get_M_pm_sq_Xpression(pm,false);
+
+      if( FSE == "tmFS" )
+	XMap[id] = XMap[id] * get_tm_FSE_Mpm_sq( pm );
+      else if(FSE == "ob" )
+	XMap[id] = XMap[id] + get_M_pm_sq_FSE_ob_Xpression( pm );
+
+
+
       PMMap[id] = pm;
     }
 

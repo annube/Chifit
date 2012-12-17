@@ -12,6 +12,7 @@ using namespace Rcpp;
 #include "symbols.h"
 #include "mpi.mq.gen.h"
 #include "eval.ex.lso.h"
+#include "ExpressionFactory.h"
 
 namespace chifit {
 
@@ -71,14 +72,14 @@ namespace chifit {
 			  lsDepPar);
   }
 
-  SEXP mpi_mq_gen_id(SEXP id,SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP fitZP) {
+  RcppExport SEXP mpi_mq_gen_id(SEXP id,SEXP x, SEXP par,SEXP aargs,SEXP deri,SEXP fitZP) {
 
     ParameterMap pm;
 
     GiNaC::ex mpisq;
 
-//     mpisq = ExpressionFactory::getInstance()->getExpression(as<int>(id));
-//     pm = ExpressionFactory::getInstance()->getExpression(as<int>(id));
+    mpisq = ExpressionFactory::getInstance()->getExpression(as<int>(id));
+    pm = ExpressionFactory::getInstance()->getParameterMap(as<int>(id));
 
 
     /* the main parameters to optimize for */

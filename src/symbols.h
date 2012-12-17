@@ -62,13 +62,6 @@ namespace chifit {
 
     bool parUsed(GiNaC::symbol s);
 
-  public:
-
-    /**
-     * Constructor
-     */
-    ParameterMap();
-
     /**
      * mark a parameter as used
      */
@@ -78,6 +71,14 @@ namespace chifit {
      * print symbol map
      */
     void print();
+
+  public:
+
+    /**
+     * Constructor
+     */
+    ParameterMap();
+
 
   };
 

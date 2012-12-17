@@ -93,13 +93,14 @@ namespace chifit {
 
 
   ParameterMap::ParameterMap(){
-      initAllParamsOrdered();
-
-      for( int i = 0 ; i< allSymbolsOrdered.size(); i++ ){
-	map.push_back(std::pair<GiNaC::symbol,bool>(allSymbolsOrdered[i],false));
-	indexMap.insert(std::pair<GiNaC::symbol,int>( allSymbolsOrdered[i] , i ) ) ;
-      }
+    initAllParamsOrdered();
+    
+    for( int i = 0 ; i< allSymbolsOrdered.size(); i++ ){
+      map.push_back(std::pair<GiNaC::symbol,bool>(allSymbolsOrdered[i],false));
+      indexMap.insert(std::pair<GiNaC::symbol,int>( allSymbolsOrdered[i] , i ) ) ;
     }
+  }
+
 
 
     /**
