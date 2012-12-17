@@ -40,7 +40,7 @@ double numEvalXPression(GiNaC::ex Xpression,GiNaC::exmap substitutions);
 
 
 SEXP eval_ex_lso(
-		 GiNaC::ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
+		 const GiNaC::ex &Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
 		 GiNaC::symbol mainRegressor,
 		 SymbolVec svec,
 		 std::vector<double> pureParDimE,

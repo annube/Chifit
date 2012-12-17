@@ -45,7 +45,7 @@ namespace chifit{
    */
 
   SEXP eval_ex_lso(
-		   ex Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
+		   const ex &Xpression,SEXP x,SEXP par, SEXP aargs,SEXP deri,
 		   symbol mainRegressor,
 		   SymbolVec pureParVec,
 		   vector<double> pureParDimE,
