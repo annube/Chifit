@@ -56,6 +56,19 @@ namespace chifit {
     int getNextId(){ return nextId++; }
 
 
+  public:
+    /**
+     * return an expression previously generated
+     */
+    const ex & getExpression(int id){ return XMap[id]; }
+
+    /**
+     * return a parameter map for a prev. generated expression from an id
+     */
+    const ParameterMap & getParameterMap(int id){ return PMMap[id]; }
+
+
+  private:
     /**
      * constructor
      */
