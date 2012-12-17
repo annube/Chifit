@@ -18,10 +18,14 @@ using namespace GiNaC;
 using namespace Rcpp;
 
 
+#include "symbols.h"
+
+
 namespace chifit {
 
 
   typedef map<int,ex> ExFromIdMap;
+  typedef map<int,ParameterMap> PMapFromIdMap;
 
   class ExpressionFactory {
 
@@ -36,6 +40,7 @@ namespace chifit {
      * a map storing all expressions by id
      */
     ExFromIdMap XMap;
+    PMapFromIdMap PMMap;
 
     /**
      * the next id to generate
@@ -58,6 +63,13 @@ namespace chifit {
 
   public:
 
+    /**
+     * this is the publicly callable function for getting an
+     * instance of the factory and should be called instead
+     * of the constructor
+     * this ensures that we have only one global instance of
+     * this class
+     */
     static ExpressionFactory * getInstance();
 
     /**

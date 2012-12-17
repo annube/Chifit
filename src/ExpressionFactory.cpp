@@ -12,8 +12,11 @@ using namespace GiNaC;
 
 using namespace Rcpp;
 
-
+#include "symbols.h"
+#include "mpi.mq.ob.h"
+#include "tmFS.h"
 #include "ExpressionFactory.h"
+
 
 namespace chifit {
 
@@ -34,7 +37,16 @@ namespace chifit {
   }
 
   int ExpressionFactory::generateXPression(const string &quant,const string &FSE){
-    return -1;
+
+    int id = getNextId();
+
+    if( quant == "mpi.mq.ob" ){
+      ParameterMap pm;
+      XMap[id] = get_M_pm_sq_Xpression(pm,false);
+      PMMap[id] = pm;
+    }
+
+    return id;
   }
 
 
