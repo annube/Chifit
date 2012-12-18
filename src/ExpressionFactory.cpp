@@ -14,8 +14,8 @@ using namespace Rcpp;
 
 #include "symbols.h"
 #include "mpi.mq.ob.h"
-#include "tmFS.h"
 #include "mpi.mq.ob.fse.h"
+#include "tmFS.h"
 #include "ExpressionFactory.h"
 
 
@@ -41,20 +41,29 @@ namespace chifit {
 
     int id = getNextId();
 
-    if( quant == "mpi.mq.ob" ){
-      ParameterMap pm;
+    ParameterMap pm;
 
-      XMap[id] = get_M_pm_sq_Xpression(pm,false);
+    if( quant == "mpi.mq.ob" ){
+
+      XMap[id] = get_M_pm_sq_ob_Xpression(pm,false);
 
       if( FSE == "tmFS" )
 	XMap[id] = XMap[id] * get_tm_FSE_Mpm_sq( pm );
-      else if(FSE == "ob" )
-	XMap[id] = XMap[id] + get_M_pm_sq_FSE_ob_Xpression( pm );
+      else  if(FSE == "ob" )
+	XMap[id] = XMap[id] + get_M_pm_sq_ob_FSE_Xpression( pm );
 
+      PMMap[id] = pm;
 
+    } else if( quant == "fpi.mq.ob" ){
+
+      XMap[id] = get_f_pm_ob_Xpression(pm,false);
+
+      if(FSE == "ob" )
+	XMap[id] = XMap[id] + get_f_pm_ob_FSE_Xpression( pm );
 
       PMMap[id] = pm;
     }
+
 
     return id;
   }

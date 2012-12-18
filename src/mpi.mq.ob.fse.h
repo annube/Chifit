@@ -5,7 +5,9 @@
 
 namespace chifit {
 
-  ex get_M_pm_sq_FSE_ob_Xpression(ParameterMap & pm  );
+  ex get_M_pm_sq_ob_FSE_Xpression(ParameterMap & pm  );
+  ex get_M_0_sq_ob_FSE_Xpression(ParameterMap & pm  );
+  ex get_f_pm_ob_FSE_Xpression(ParameterMap & pm  );
 
 
 };
