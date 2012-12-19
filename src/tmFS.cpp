@@ -260,7 +260,7 @@ namespace chifit{
 
 
 
-    I_M_pm_2_contr = - xi_pm * gtilde1(labmda_pm);
+    ex I_M_pm_2_contr = - xi_pm * gtilde1(lambda_pm);
 
     ex I_M_pm_4_B_0_contr = 0;
 
@@ -282,9 +282,13 @@ namespace chifit{
 
     ex X=
         I_M_0_2_contr
+
       + I_M_0_4_B_0_contr
       + I_M_0_4_B_2_contr
       + I_M_0_4_Rs_contr
+
+      + I_M_pm_2_contr
+
       + I_M_pm_4_B_0_contr
       + I_M_pm_4_B_2_contr
       + I_M_pm_4_Rs_contr
