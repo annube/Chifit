@@ -48,7 +48,7 @@ namespace chifit {
       XMap[id] = get_M_pm_sq_ob_Xpression(pm,false);
 
       if( FSE == "tmFS" )
-	XMap[id] = XMap[id] * get_tm_FSE_Mpm_sq( pm );
+	XMap[id] = XMap[id] + get_tm_FSE_Mpm_sq( pm );
       else  if(FSE == "ob" )
 	XMap[id] = XMap[id] + get_M_pm_sq_ob_FSE_Xpression( pm );
 
