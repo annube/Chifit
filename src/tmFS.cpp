@@ -252,24 +252,49 @@ namespace chifit{
 
     ex I_M_0_2_contr = -xi_pm * r_0 * lambda_0 / lambda_pm * gtilde1( lambda_0) ;
 
-    ex I_M_0_4_B_0_contr = 0;
+    ex I_M_0_4_B_0_contr = 2.*pow( xi_pm , 2 ) * r_0*lambda_0/lambda_pm
+      *gtilde1(lambda_0)
+      *(1./9.-2./3.*log_Mpm_L1+log_Mpm_L4);
 
-    ex I_M_0_4_B_2_contr = 0;
+    ex I_M_0_4_B_2_contr = 
+      4. * pow( xi_pm , 2) / lambda_pm * pow( r_0 , 3 ) * B2k_0(lambda_0,1)
+      *( 
+	20./9. 
+	+ 8./3.*log_Mpm_L2
+	);
 
-    ex I_M_0_4_Rs_contr =  0;
+    ex I_M_0_4_Rs_contr = 4. * pow( xi_pm , 2) / lambda_pm
+      *1./3. 
+      * (
+	       r_0    * ( 2. * tmFS_R(lambda_0,0,r_0) - 1. * tmFS_dR(lambda_0,0,r_0) )
+	 + pow(r_0,2) * ( 4. * tmFS_R(lambda_0,1,r_0) - 2. * tmFS_dR(lambda_0,1,r_0) )
+	 + pow(r_0,3) * (-8. * tmFS_R(lambda_0,2,r_0) + 4. * tmFS_dR(lambda_0,2,r_0) )
+	 ) ;
 
 
 
     ex I_M_pm_2_contr = - xi_pm * gtilde1(lambda_pm);
 
-    ex I_M_pm_4_B_0_contr = 0;
+    ex I_M_pm_4_B_0_contr = 4*pow( xi_pm , 2 ) / lambda_pm*B2k_0(lambda_pm,0)
+      *(
+	- 8./9.
+	- 4./3. * log_Mpm_L1
+	- 4./3. * log_Mpm_L2
+	+ 2.    * log_Mpm_L4 ) ;
 
 
-    ex I_M_pm_4_B_2_contr = 0;
+    ex I_M_pm_4_B_2_contr = 4. * pow( xi_pm , 2) / lambda_pm*B2k_0(lambda_pm,1)
+      *( - 92. / 9. + 8. / 3. * log_Mpm_L1 + 8. * log_Mpm_L2 );
 
 
 
-    ex I_M_pm_4_Rs_contr = 0;
+    ex I_M_pm_4_Rs_contr = 4. * pow( xi_pm , 2) / lambda_pm
+      *1./3. 
+      * (
+	  (  2. * tmFS_R(lambda_pm,0,1) - 11./2. * tmFS_dR(lambda_pm,0,1) )
+	 +( -8. * tmFS_R(lambda_pm,1,1) + 10.    * tmFS_dR(lambda_pm,1,1) )
+	 +(-32. * tmFS_R(lambda_pm,2,1) + 16.    * tmFS_dR(lambda_pm,2,1) )
+	 ) ;
 
 
     pm.add( B );
