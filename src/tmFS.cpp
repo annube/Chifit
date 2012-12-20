@@ -19,6 +19,7 @@ using namespace GiNaC;
 #include "gtilde.h"
 #include "tmFS.B20.fn.h"
 #include "tmFS.R.fn.h"
+#include "tmFS.dR.fn.h"
 #include "symbols.h"
 #include "eval.ex.lso.h"
 
