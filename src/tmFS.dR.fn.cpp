@@ -5,6 +5,10 @@
 using namespace GiNaC;
 
 
+#include <Rcpp.h>
+
+using namespace Rcpp;
+
 #include "utils.h"
 #include "tmFS.dR.fn.h"
 #include "tmFS.R.fn.h"
@@ -68,18 +72,18 @@ double dR_integrand_dr(double y, void *params){
   //  cout << fnEvalCount << endl;
 
 
-  if( sp->k % 2 == 0 ){
+  if( ( sp->k ) % 2 == 0 ){
     return 
       pow(y,sp->k) 
       * exp( -sp->x * sqrt( sp->n* ( 1. + y * y )  ) ) 
       *
-      ( chifit::R_ddg( complex<double>(2.,2.*sp->r*y) ) * complex<double>(0,2*y) ).real();
+      ( -2. ) * y *( chifit::R_ddg( complex<double>(2.,2.*sp->r*y) ) ).imag();
   } else {
     return 
       pow(y,sp->k)
       * exp( -sp->x * sqrt( sp->n* ( 1. + y * y ) ) )
       *
-      ( chifit::R_ddg( complex<double>(2.,2.*sp->r*y) ) * complex<double>(0,2*y) ).imag();
+      ( chifit::R_ddg( complex<double>(2.,2.*sp->r*y) ) ).real()* 2. * y;
   }
     
 }
@@ -124,6 +128,7 @@ ex eval_tmFS_dR_fn_deri(const ex &x,const ex & k , const ex & r,unsigned diffpar
   return NAN;
 }
 
+
 /**
  * make this function be known to ginac
  */
@@ -133,6 +138,16 @@ REGISTER_FUNCTION(tmFS_dR,
 		  evalf_func(evalf_tmFS_dR_fn).
 		  derivative_func(eval_tmFS_dR_fn_deri)
 		  );
+
+
+
+/**
+ * export the function to R
+ */
+RcppExport SEXP tmFS_dR_fn_R_ginac(SEXP x,SEXP k, SEXP r){
+  ex fnv=tmFS_dR(as<double>(x),as<int>(k),as<double>(r));
+  return wrap( ex_to<numeric>(fnv.evalf()).to_double() );
+}
 
 
 
@@ -170,6 +185,11 @@ REGISTER_FUNCTION(tmFS_dR_dx,
 
 
 
+RcppExport SEXP tmFS_dR_dx_fn_R_ginac(SEXP x,SEXP k, SEXP r){
+  ex fnv=tmFS_dR_dx(as<double>(x),as<int>(k),as<double>(r));
+  return wrap( ex_to<numeric>(fnv.evalf()).to_double() );
+}
+
 /**
  * ginac function for evaluation
  */
@@ -192,7 +212,7 @@ ex evalf_tmFS_dR_dr_fn(const ex &x,const ex & k , const ex & r){
 		      &dR_integrand_dr
 		      ) ;
   } else {
-    return tmFS_R_dr(x,k,r).hold();
+    return tmFS_dR_dr(x,k,r).hold();
   }
 }
 
@@ -204,3 +224,7 @@ REGISTER_FUNCTION(tmFS_dR_dr,
 
 
 
+RcppExport SEXP tmFS_dR_dr_fn_R_ginac(SEXP x,SEXP k, SEXP r){
+  ex fnv=tmFS_dR_dr(as<double>(x),as<int>(k),as<double>(r));
+  return wrap( ex_to<numeric>(fnv.evalf()).to_double() );
+}

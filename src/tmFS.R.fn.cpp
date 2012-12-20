@@ -97,18 +97,18 @@ double R_integrand_dr(double y, void *params){
   //  cout << fnEvalCount << endl;
 
 
-  if( sp->k % 2 == 0 ){
+  if( ( sp->k ) % 2 == 0 ){
     return 
       pow(y,sp->k) 
       * exp( -sp->x * sqrt( sp->n* ( 1. + y * y )  ) ) 
       *
-      ( chifit::R_dg( complex<double>(2.,2.*sp->r*y) ) * complex<double>(0,2*y) ).real();
+      ( -2. ) * y *( chifit::R_dg( complex<double>(2.,2.*sp->r*y) ) ).imag();
   } else {
     return 
       pow(y,sp->k)
       * exp( -sp->x * sqrt( sp->n* ( 1. + y * y ) ) )
       *
-      ( chifit::R_dg( complex<double>(2.,2.*sp->r*y) ) * complex<double>(0,2*y) ).imag();
+      ( chifit::R_dg( complex<double>(2.,2.*sp->r*y) ) ).real()* 2. * y;
   }
     
 }

@@ -4,6 +4,10 @@
 
 using namespace GiNaC;
 
+#include <Rcpp.h>
+
+using namespace Rcpp;
+
 #include "tmFS.R.g.fn.h"
 
 namespace chifit {
@@ -58,6 +62,12 @@ namespace chifit {
   }
 
 
+  RcppExport SEXP R_g_fn_R(SEXP x){
+    return wrap(R_g(as<complex<double> >(x) ) );
+  }
 
+  RcppExport SEXP R_dg_fn_R(SEXP x){
+    return wrap(R_dg(as<complex<double> >(x) ) );
+  }
 
 };
