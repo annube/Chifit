@@ -60,6 +60,9 @@ namespace chifit {
 
       if(FSE == "ob" )
 	XMap[id] = XMap[id] + get_f_pm_ob_FSE_Xpression( pm );
+      else  if(FSE == "tmFS" )
+	XMap[id] = XMap[id] + get_tm_FSE_Rfpm( pm );
+
 
       PMMap[id] = pm;
     }
