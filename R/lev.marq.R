@@ -58,7 +58,7 @@ lev.marq <- function( x,y,dy,fn,dfn,par.0,par.priors=par.0,priors.sigmas=rep(Inf
       chisqr = chisqr.new
       lambda = lambda / nu
     } else {
-        print(paste("increasing lambda because of increase of new chisqr (new chisqr = " , chisqr.new ,")" ))
+        ## print(paste("increasing lambda because of increase of new chisqr (new chisqr = " , chisqr.new ,")" ))
         lambda = lambda * nu
     }
   }
