@@ -54,6 +54,7 @@ wlm <- function(x,y,dy=NULL,C=NULL){
   }
   else {
     X <- cbind( rep(1,length(y)) )
+    len = length(y)
   }
 
 
@@ -62,8 +63,10 @@ wlm <- function(x,y,dy=NULL,C=NULL){
   
   Cw <- t(X) %*% W %*% X
 
-  
-  Cwi <- diagonal.precondition.solve(Cw)
+  if(  dim(Cw)[1] > 1 )
+    Cwi <- diagonal.precondition.solve(Cw)
+  else
+    Cwi = 1/Cw
 
   
   Beta <-  (  Cwi %*%  (  t(X) %*% ( W  %*% y ) ) )
@@ -309,7 +312,7 @@ wnlls <- function(x.in,y,dy=NULL,C=NULL,f.in,df.in=NULL,par,range=NULL,optim.met
 }
 
 
-plot.wnlls <- function(res,use.col=1,x.data = NULL,plot.range,line.ranges=list(), plot.predict.error=TRUE, ...){
+plot.wnlls <- function(res,use.col=1,x.data = NULL,plot.range,line.ranges=list(), plot.predict.error=TRUE, ...,plot.betas=T){
 
 
 ##  attach(res)
@@ -359,17 +362,19 @@ plot.wnlls <- function(res,use.col=1,x.data = NULL,plot.range,line.ranges=list()
 
 
 
-  text(  0.5*(x.min+x.max), min( ( res$y - res$dy ) [plot.range] ),  bquote(  paste ( chi^2 == .( res$Chisqr ) , "; " , dof == .(res$dof) ) ) ) 
-  text(
-       0.5*(x.min+x.max), max( ( res$y + res$dy ) [plot.range] ),
-       bquote(  paste (
-                       beta[1] == .( res$beta[1] ),
-                       "; " ,
-                       beta[2] == .(res$beta[2]) ,
-                       "; " ,
-                       beta[3] == .(res$beta[3]) 
-       ))
-       )
+  text(  0.5*(x.min+x.max), min( ( res$y - res$dy ) [plot.range] ),  bquote(  paste ( chi^2 == .( res$Chisqr ) , "; " , dof == .(res$dof) ) ) )
+
+  if( plot.betas )
+    text(
+         0.5*(x.min+x.max), max( ( res$y + res$dy ) [plot.range] ),
+         bquote(  paste (
+                         beta[1] == .( res$beta[1] ),
+                         "; " ,
+                         beta[2] == .(res$beta[2]) ,
+                         "; " ,
+                         beta[3] == .(res$beta[3]) 
+                         ))
+         )
   
 ##  text(  0.5*(x.min+x.max), max( ( res$y + res$dy ) [plot.range] ),  bquote(  paste ( beta[1] == .( res$beta[1] ) +- .( res$dbeta[1] ),
 ##                                                                "; " ,
