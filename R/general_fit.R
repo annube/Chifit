@@ -432,7 +432,7 @@ direct_fit_y <- function(boot_x,boot_y,x_in,dx_in){
 
 
                                         # $Id: plotutils.R 134 2010-05-13 16:06:21Z urbach $
-plotwitherror_dx <- function(x, dx , y, dy,xlim ,ylim, rep=FALSE, ...) {
+plotwitherror_dx <- function(x, dx=NULL , y, dy,xlim ,ylim, rep=FALSE, ... ,arrow.l=0.02) {
 
   if(missing(ylim))   ylim=c(min(y-2*dy, na.rm = TRUE),max(y+2*dy, na.rm = TRUE))
   if(missing(xlim))   xlim=c(min(x-2*dx, na.rm = TRUE),max(x+2*dx, na.rm = TRUE))
@@ -443,8 +443,9 @@ plotwitherror_dx <- function(x, dx , y, dy,xlim ,ylim, rep=FALSE, ...) {
     points(x,y, xlim = xlim, ylim = ylim,...)
   }
     
-  arrows(x, y-dy, x, y+dy, length=0.02,angle=90,code=3,... )
-  arrows(x-dx, y, x+dx, y, length=0.02,angle=90,code=3,... )
+  arrows(x, y-dy, x, y+dy, length=arrow.l,angle=90,code=3,... )
+  if( ! missing( dx ) )
+    arrows(x-dx, y, x+dx, y, length=arrow.l,angle=90,code=3,... )
 }
 
 plot_direct_fit <- function(fit_result,ensemble_name="YZZ.VV",meson="X"){
