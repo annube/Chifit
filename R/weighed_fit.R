@@ -362,7 +362,7 @@ plot.wnlls <- function(res,use.col=1,x.data = NULL,plot.range,line.ranges=list()
 
 
 
-  text(  0.5*(x.min+x.max), min( ( res$y - res$dy ) [plot.range] ),  bquote(  paste ( chi^2 == .( res$Chisqr ) , "; " , dof == .(res$dof) ) ) )
+  text(  0.5*(x.min+x.max), min( ( res$y - res$dy ) [plot.range] ),  bquote(  paste ( chi^2 == .( res$Chisqr ) , "; " , dof == .(res$dof) , "; " , p == .(1-pchisq(res$Chisqr,res$dof) ) ) ) )
 
   if( plot.betas )
     text(
