@@ -65,7 +65,7 @@ namespace chifit {
 
     static ex log_M0_X3 = log( M0_sq / pow( Xi3 , 2 )  )  ;
 
-    static ex X_FSE =   Mpm_sq * ( 1. +2.*xi_pm * ( log_Mpm_L3 + fse_log_corr_Mpm ) - xi_0 * ( log_M0_L3 +  + fse_log_corr_M0 )) 
+    static ex X_FSE =   Mpm_sq * ( 1. +2.*xi_pm * ( log_Mpm_L3 + fse_log_corr_Mpm ) - xi_0 * ( log_M0_L3 + fse_log_corr_M0 )) 
       + 2 * c2 *( 1 - 4. * xi_0 * ( log_M0_X3 + fse_log_corr_M0) + CM0); 
 
     static ex X =   Mpm_sq * ( 1. +2.*xi_pm * log_Mpm_L3 - xi_0 * log_M0_L3 ) 
