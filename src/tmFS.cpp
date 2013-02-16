@@ -31,8 +31,8 @@ namespace chifit{
 
     ex r_0 = sqrt( M0_sq / Mpm_sq );
 
-    static ex xi_pm = Mpm_sq/ pow( 4. * Pi * f , 2 );
-    static ex xi_0 = M0_sq/ pow( 4. * Pi * f , 2 );
+    static ex xi_pm = Mpm_sq / pow( 4 * Pi * f , 2 );
+    static ex xi_0 = M0_sq / pow(  4 * Pi * f , 2 );
 
     static ex log_Mpm_L1 = log( Mpm_sq / pow( Lambda1 , 2 ) );
     static ex log_Mpm_L2 = log( Mpm_sq / pow( Lambda2 , 2 ) );
@@ -73,7 +73,7 @@ namespace chifit{
     // I_M_pm_2_contr = 0  !! -> no work needed
 
     ex I_M_pm_4_B_0_contr = 
-      - pow( xi_pm , 2) 
+      - pow( xi_pm , 2) / lambda_pm
       * ( - 8./3.*(  log_Mpm_L1 + log_Mpm_L2 ) + 2. * log_Mpm_L3 - 34./9.)
       * gtilde1(lambda_pm);
 
