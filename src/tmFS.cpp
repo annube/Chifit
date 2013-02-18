@@ -25,7 +25,7 @@ using namespace GiNaC;
 
 namespace chifit{
 
-  ex get_tm_FSE_Rpm(ParameterMap & pm){
+  ex get_tm_FSE_Rpm(ParameterMap & pm, bool simplified){
     ex lambda_pm=sqrt( Mpm_sq ) *  L;
     ex lambda_0=sqrt( M0_sq ) *  L;
 
@@ -38,6 +38,10 @@ namespace chifit{
     static ex log_Mpm_L2 = log( Mpm_sq / pow( Lambda2 , 2 ) );
     static ex log_Mpm_L3 = log( Mpm_sq / pow( Lambda3 , 2 ) );
     static ex log_Mpm_L4 = log( Mpm_sq / pow( Lambda4 , 2 ) );
+    static double g0 = 2.-M_PI/2.;
+    static double g1 = M_PI - 2.;
+    static double g2 = 1./2. - M_PI/4.;
+    static double g3 = 3.*M_PI/16. - 0.5;
 
 
 
@@ -51,22 +55,30 @@ namespace chifit{
 	 +1./2.*log_Mpm_L3
 	 +2.*log_Mpm_L4
 	 + 13./18.
+	 + (simplified?(2./3.*g0):0)
 	 ) ;
 
     ex I_M_0_4_B_2_contr = 
       - 2 * pow(xi_pm,2) / lambda_pm 
-      * (20./9.+8./3.*log_Mpm_L2)
+      * (
+	 20./9.
+	 + 8./3.*log_Mpm_L2
+	 + (simplified?(2./3.*( 4. * g1 - 4. * g0 - 2. * g2 )):0)
+	 )
       * pow(r_0,3)
       * B2k_0( lambda_0 , 1 );
 
-    ex I_M_0_4_Rs_contr = 
-      - 2 * pow(xi_pm,2) / lambda_pm
-      * 2./3.
-      *(
-	 1. *     r_0    * tmFS_R(lambda_0,0,r_0)
-	+2. * pow(r_0,2) * tmFS_R(lambda_0,1,r_0)
-	-4. * pow(r_0,3) * tmFS_R(lambda_0,2,r_0)
-	);
+    ex I_M_0_4_Rs_contr = 0;
+
+    if( ! simplified )
+      I_M_0_4_Rs_contr = 
+	- 2 * pow(xi_pm,2) / lambda_pm
+	* 2./3.
+	*(
+	  1. *     r_0    * tmFS_R(lambda_0,0,r_0)
+	  +2. * pow(r_0,2) * tmFS_R(lambda_0,1,r_0)
+	  -4. * pow(r_0,3) * tmFS_R(lambda_0,2,r_0)
+	  );
 
 
 
@@ -74,27 +86,36 @@ namespace chifit{
 
     ex I_M_pm_4_B_0_contr = 
       - pow( xi_pm , 2) / lambda_pm
-      * ( - 8./3.*(  log_Mpm_L1 + log_Mpm_L2 ) + 2. * log_Mpm_L3 - 34./9.)
+      * ( - 8./3.*(  log_Mpm_L1 + log_Mpm_L2 ) 
+	  + 2. * log_Mpm_L3 - 34./9.
+	  + ( simplified?(11./3.*g0):0 )
+	  )
       * gtilde1(lambda_pm);
 
 
     ex I_M_pm_4_B_2_contr = 
       - 2 * pow(xi_pm,2) / lambda_pm 
-      * (92./9.+8./3.*log_Mpm_L1 + 8. * log_Mpm_L2)
-      // * r_pm^3 = 1 (r_pm = 1) 
+      * (92./9.
+	 + 8./3.*log_Mpm_L1 
+	 + 8. * log_Mpm_L2
+	 + ( simplified? ( -22./3. * g2 - 40./3. * g1 - 32./3. * g0):0)
+	 )
       * B2k_0( lambda_pm , 1 );
 
 
 
-    ex I_M_pm_4_Rs_contr = 
-      - 2 * pow(xi_pm,2) / lambda_pm
-      * 1./3.
-      *(
-	11. * tmFS_R(lambda_pm,0,1.)
-	-20. * tmFS_R(lambda_pm,1,1.)
-	-32. * tmFS_R(lambda_pm,2,1.)
-	)
-      ;
+    ex I_M_pm_4_Rs_contr = 0;
+
+    if( !simplified )
+      I_M_pm_4_Rs_contr = 
+	- 2 * pow(xi_pm,2) / lambda_pm
+	* 1./3.
+	*(
+	  11. * tmFS_R(lambda_pm,0,1.)
+	  -20. * tmFS_R(lambda_pm,1,1.)
+	  -32. * tmFS_R(lambda_pm,2,1.)
+	  )
+	;
 
 
     pm.add( B );
