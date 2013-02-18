@@ -251,10 +251,9 @@ namespace chifit{
 
 
 
-    ex I_M_0_2_contr = -xi_pm * r_0 * lambda_0 / lambda_pm * gtilde1( lambda_0) ;
+    ex I_M_0_2_contr = -xi_0  * gtilde1( lambda_0) ;
 
-    ex I_M_0_4_B_0_contr = 2.*pow( xi_pm , 2 ) * r_0*lambda_0/lambda_pm
-      *gtilde1(lambda_0)
+    ex I_M_0_4_B_0_contr = 2. * xi_pm * xi_0 * gtilde1(lambda_0)
       *(1./9.-2./3.*log_Mpm_L1+log_Mpm_L4);
 
     ex I_M_0_4_B_2_contr = 
