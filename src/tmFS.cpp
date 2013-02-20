@@ -256,7 +256,7 @@ namespace chifit{
 
 
 
-  ex get_tm_FSE_Rfpm(ParameterMap & pm){
+  ex get_tm_FSE_Rfpm(ParameterMap & pm, bool simplified){
     ex lambda_pm=sqrt( Mpm_sq ) *  L;
     ex lambda_0=sqrt( M0_sq ) *  L;
 
@@ -269,28 +269,41 @@ namespace chifit{
     static ex log_Mpm_L2 = log( Mpm_sq / pow( Lambda2 , 2 ) );
     static ex log_Mpm_L3 = log( Mpm_sq / pow( Lambda3 , 2 ) );
     static ex log_Mpm_L4 = log( Mpm_sq / pow( Lambda4 , 2 ) );
+    static double g0 = 2.-M_PI/2.;
+    static double g1 = M_PI - 2.;
+    static double g2 = 1./2. - M_PI/4.;
+    static double g3 = 3.*M_PI/16. - 0.5;
 
 
 
     ex I_M_0_2_contr = -xi_0  * gtilde1( lambda_0) ;
 
     ex I_M_0_4_B_0_contr = 2. * xi_pm * xi_0 * gtilde1(lambda_0)
-      *(1./9.-2./3.*log_Mpm_L1+log_Mpm_L4);
+      *(
+	1./9.
+	-2./3.*log_Mpm_L1
+	+log_Mpm_L4
+	+ ( simplified ? ( 1./3. * (2 * g0 - g1 ) ) : 0 )
+	);
 
     ex I_M_0_4_B_2_contr = 
       4. * pow( xi_pm , 2) / lambda_pm * pow( r_0 , 3 ) * B2k_0(lambda_0,1)
       *( 
 	20./9. 
 	+ 8./3.*log_Mpm_L2
+	+ ( simplified ? ( 2./3. * ( - 4.*g0 + 6.*g1 -4. * g2 + g3  ) ) : 0 )
 	);
 
-    ex I_M_0_4_Rs_contr = 4. * pow( xi_pm , 2) / lambda_pm
-      *1./3. 
-      * (
-	       r_0    * ( 2. * tmFS_R(lambda_0,0,r_0) - 1. * tmFS_dR(lambda_0,0,r_0) )
-	 + pow(r_0,2) * ( 4. * tmFS_R(lambda_0,1,r_0) - 2. * tmFS_dR(lambda_0,1,r_0) )
-	 + pow(r_0,3) * (-8. * tmFS_R(lambda_0,2,r_0) + 4. * tmFS_dR(lambda_0,2,r_0) )
-	 ) ;
+    ex I_M_0_4_Rs_contr = 0;
+
+    if( ! simplified )
+      I_M_0_4_Rs_contr = 4. * pow( xi_pm , 2) / lambda_pm
+	*1./3. 
+	* (
+	   r_0    * ( 2. * tmFS_R(lambda_0,0,r_0) - 1. * tmFS_dR(lambda_0,0,r_0) )
+	   + pow(r_0,2) * ( 4. * tmFS_R(lambda_0,1,r_0) - 2. * tmFS_dR(lambda_0,1,r_0) )
+	   + pow(r_0,3) * (-8. * tmFS_R(lambda_0,2,r_0) + 4. * tmFS_dR(lambda_0,2,r_0) )
+	   ) ;
 
 
 
@@ -301,21 +314,30 @@ namespace chifit{
 	- 8./9.
 	- 4./3. * log_Mpm_L1
 	- 4./3. * log_Mpm_L2
-	+ 2.    * log_Mpm_L4 ) ;
+	+ 2.    * log_Mpm_L4 
+	+ ( simplified ? ( 1./6. * ( 4. * g0 - 11. * g1 ) ) : 0 )
+	) ;
 
 
     ex I_M_pm_4_B_2_contr = 4. * pow( xi_pm , 2) / lambda_pm*B2k_0(lambda_pm,1)
-      *( - 92. / 9. + 8. / 3. * log_Mpm_L1 + 8. * log_Mpm_L2 );
+      *( - 92. / 9. 
+	 + 8. / 3. * log_Mpm_L1 
+	 + 8. * log_Mpm_L2 
+	 + ( simplified ? ( 2./6. * ( -32. * g0 + 16. * g2 + 11. * g3 ) ) : 0 )
+	 );
 
 
 
-    ex I_M_pm_4_Rs_contr = 4. * pow( xi_pm , 2) / lambda_pm
-      *1./3. 
-      * (
-	  (  2. * tmFS_R(lambda_pm,0,1) - 11./2. * tmFS_dR(lambda_pm,0,1) )
-	 +( -8. * tmFS_R(lambda_pm,1,1) + 10.    * tmFS_dR(lambda_pm,1,1) )
-	 +(-32. * tmFS_R(lambda_pm,2,1) + 16.    * tmFS_dR(lambda_pm,2,1) )
-	 ) ;
+    ex I_M_pm_4_Rs_contr = 0;
+
+    if( ! simplified )
+      I_M_pm_4_Rs_contr = 4. * pow( xi_pm , 2) / lambda_pm
+	*1./3. 
+	* (
+	   (  2. * tmFS_R(lambda_pm,0,1) - 11./2. * tmFS_dR(lambda_pm,0,1) )
+	   +( -8. * tmFS_R(lambda_pm,1,1) + 10.    * tmFS_dR(lambda_pm,1,1) )
+	   +(-32. * tmFS_R(lambda_pm,2,1) + 16.    * tmFS_dR(lambda_pm,2,1) )
+	   ) ;
 
 
     pm.add( B );
