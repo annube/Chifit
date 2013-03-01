@@ -43,6 +43,7 @@ namespace chifit {
 
     ParameterMap pm;
 
+
     if( quant == "mpi.mq.ob" ){
 
       XMap[id] = get_M_pm_sq_ob_Xpression(pm,false);
@@ -50,7 +51,7 @@ namespace chifit {
       if(FSE == "ob" )
 	XMap[id] = XMap[id] + get_M_pm_sq_ob_FSE_Xpression( pm );
       else if( FSE == "tmFS" )
-	XMap[id] = XMap[id]*(1 + 2. * get_tm_FSE_Rpm( pm ));
+	XMap[id] = XMap[id] * pow( 1 + get_tm_FSE_Rpm( pm ) , 2 );
 
       PMMap[id] = pm;
 
@@ -61,7 +62,7 @@ namespace chifit {
       if(FSE == "ob" )
 	XMap[id] = XMap[id] + get_f_pm_ob_FSE_Xpression( pm );
       else  if(FSE == "tmFS" )
-	XMap[id] = XMap[id] *( 1 +  get_tm_FSE_Rfpm( pm ) );
+	XMap[id] = XMap[id] * ( 1 +  get_tm_FSE_Rfpm( pm  ) );
 
 
       PMMap[id] = pm;
@@ -72,11 +73,24 @@ namespace chifit {
       if(FSE == "ob" )
 	XMap[id] = XMap[id] + get_M_0_sq_ob_FSE_Xpression( pm );
       else  if(FSE == "tmFS" )
-	XMap[id] = XMap[id] *( 1 + 2 * get_tm_FSE_RM0( pm ) );
+	XMap[id] = XMap[id] * pow( 1 +  get_tm_FSE_RM0( pm ) , 2 );
 
 
       PMMap[id] = pm;
+    } else  if( quant == "ob.FSE.mpm" ) {
+      XMap[id] =  get_M_pm_sq_ob_FSE_Xpression( pm ) ;
+      PMMap[id] = pm;
+    } else  if( quant == "ob.FSE.fpm" ) {
+      XMap[id] = get_f_pm_ob_FSE_Xpression( pm );
+      PMMap[id] = pm;
+    } else  if( quant == "tmFS.mpm" ) {
+      XMap[id] =  1. + 2. * get_tm_FSE_Rpm( pm );
+      PMMap[id] = pm;
+    } else  if( quant == "tmFS.fpm" ) {
+      XMap[id] = 1. +  get_tm_FSE_Rfpm( pm );
+      PMMap[id] = pm;
     }
+
 
 
     return id;
