@@ -14,3 +14,4 @@ LinkingTo: Rcpp
 #Depends: elliptic
 Depends: boot
 Depends: hadron
+Depends: multicore
