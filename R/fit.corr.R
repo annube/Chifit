@@ -81,6 +81,8 @@ fit.correlator <- function( data  , T ,t1 , t2 , automatic.t1.adjust = T , num.t
   corr <- lapply( data ,function(le) apply( le , 2 ,mean) )
   
   ce.res <- lapply( data , function( le ) correlator.error( le , ...) )
+
+  boot.R = dim( ce.res[[1]]$boot.res$t )[1]
   
   dcorr <- lapply( ce.res , function( le ) le$boot.err )
 
@@ -178,17 +180,17 @@ fit.correlator <- function( data  , T ,t1 , t2 , automatic.t1.adjust = T , num.t
   }
   
   
-  if( correlated.fit ) {
-    C <- cov( ce.res$boot.res$t )
-    print( sqrt(diag(C)) / dcorr )
-  }
-  else
-    C <- diag( dcorr^2 )
+  ## if( correlated.fit ) {
+  ##   C <- cov( ce.res$boot.res$t )
+  ##   print( sqrt(diag(C)) / dcorr )
+  ## }
+  ## else
+  ##   C <- diag( dcorr^2 )
 
   
   fit.wlm <- function( corr.data ) {
-    lm.res <- lev.marq(  ( 0:(T/2) ) [ range ]  , corr.data [range] ,
-                       dcorr [ range ] ,
+    lm.res <- lev.marq(  ( 0:(T/2) ) [ range ]  , corr.data ,
+                       dcorr.all.range ,
                        function(x,par) mycosh.fn(x,par,list( T = T )),
                        function(x,par) dmycosh.fn(x,par,list( T = T )),
                        lm.res$beta
@@ -196,19 +198,29 @@ fit.correlator <- function( data  , T ,t1 , t2 , automatic.t1.adjust = T , num.t
     return( lm.res )
   }
   
-  lm.res.2 <- fit.wlm( corr )
+  lm.res.2 <- fit.wlm( corr.all.range )
 
 
-  corr.all.range.boot <- array( NaN , dim=c( dim( data[[1]] )[1] * length(data) , 
+  corr.all.range.boot <- array( NaN ,
+                               dim = c(
+                                 boot.R ,
+                                 length(range) * length( data )
+                                 )
+                               )
+
   
+  for( i in 1:length(data) ) {
+    corr.all.range.boot[, ( 1:length(range) ) + (i-1)*length(range)] = ce.res[[i]]$boot.res$t[,range]
+  }
+
   
   lm.res.boot <- mcapply(
-    ce.res$boot.res$t ,
+    corr.all.range.boot ,
     function( corr ) { fr <- fit.wlm(corr); return( c( fr$beta,fr$Chisqr ) ) } , mc.cores=4, mc.preschedule = FALSE
     )
     
   
-  return()
+  return(lm.res.boot)
   
 
   ## fit first excited state
