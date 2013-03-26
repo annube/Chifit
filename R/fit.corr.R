@@ -131,7 +131,6 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
     m.approx.mean <- lm(  m.approx.all.range ~1,weights=1/dm.approx.all.range^2)$coefficients[1]
     chisqr = sum( ( (m.approx.all.range - m.approx.mean )/dm.approx.all.range )^2 )
     p.value = 1 - pchisq( chisqr , length(m.approx.all.range) - 1 )
-    print(p.value)
   }
 
 
@@ -167,9 +166,7 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
   corr.all.range <- unlist ( lapply( corr , function( le ) le[range] ) )
   dcorr.all.range <- unlist ( lapply( dcorr , function( le ) le[range] ) )
 
-  ## print( ( 0:(T/2+1) )[range] )
-  ## print( corr.all.range )
-  ## print( dcorr.all.range )
+
   
   lm.res <- lev.marq(  ( 0:(T/2+1) )[range] , corr.all.range,dcorr.all.range,
                      function(x,par) mycosh.fn(x,par,list( T = T )),
@@ -277,7 +274,6 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
   while( ( p.value < 0.05 && automatic.t1.adjust[2] )  || once ) {
     once = FALSE
     if ( automatic.t1.adjust[2] ) t1.exc1 = t1.exc1 + 1
-    print( t1.exc1 )
     ##range = round( seq( (t1.exc1+1),(t2+1),length.out = num.t.points ) )
     range = ( t1.exc1 + 1 ):( t2 + 1 )
     range.all = rep( range , length(data) ) + rep( 0:(length(data)-1) * (T/2+1) , each = length(range) )
@@ -323,6 +319,13 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
   lm.res.two.states <- fit.lm.two.states(corr.all[range.all])
 ##  lm.res.exc1 = lm.res.two.states
 
+
+##   par.only.excited = lm.res.two.states$beta
+##   par.only.excited[1:length(data)] = 0
+
+##   corr.diff.exc = corr.all - mycosh.two.states( 0:(T/2) , par.only.excited 
+  
+  
 
   dof.two.states = length( range ) * length(data) - length( lm.res.two.states$beta )
   
@@ -387,7 +390,7 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
               lm.res.2 = lm.res.2,
               lm.res.boot = lm.res.boot,
               dof = dof,
-              ##      lm.res.exc1 = lm.res.exc1,
+              lm.res.exc1 = lm.res.exc1,
               t1 = t1 , t1.exc1 = t1.exc1, t2 = t2,
               lm.res.two.states = lm.res.two.states,
               lm.res.two.states.boot = lm.res.two.states.boot,
