@@ -37,14 +37,25 @@ correlator.error <- function( data , boot.R = 100 , boot.l = 10,ncpus=4 ) {
   boot.mean <- function(data)
     apply( data , 2 , mean )
 
+
+  n.sim = floor( dim(data)[1] / boot.l ) * boot.l
     
-  ts.boot.res <- tsboot(data, boot.mean , boot.R , sim = "fixed" , l = boot.l ,parallel = "multicore",ncpus=ncpus )
+  ts.boot.res <- tsboot(data,
+                        boot.mean ,
+                        boot.R ,
+                        sim = "fixed" ,
+                        l = boot.l ,
+                        parallel = "multicore",
+                        ncpus=ncpus,
+                        n.sim = n.sim ,
+                        endcorr=FALSE )
 
   boot.err <- apply( ts.boot.res$t,2,sd)
 
   
   return( list( std.err = std.err ,
                boot.err = boot.err,
+               correction.factor = sqrt( n.sim ) / sqrt( dim(data)[1] ),
                boot.res = ts.boot.res
                )
          )  
@@ -110,15 +121,17 @@ simple.correlator.fit <- function(  Corr , dCorr  , f ,df , T , p.min = 0.1){
 
 
 
-fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automatic.t1.exc1.adjust = TRUE , max.chisqr.o.dof = 0.05, ncpus = 4 ,...) {
+fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automatic.t1.exc1.adjust = TRUE , max.chisqr.o.dof = 0.05, ncpus = 4 , max.exc.state.contamin = 0.2 ,...) {
   require(hadron)
-  
+
   if( length(data) == 1  ){
     mycosh.fn = mycosh
     dmycosh.fn = dmycosh
+    num.par = 2
   } else if( length(data) == 2 ) {
     mycosh.fn = mycosh.2
     dmycosh.fn = dmycosh.2
+    num.par = 3
   }
     
   
@@ -151,10 +164,10 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
   
   
   mycosh.two.states <- function( x, par )
-    mycosh.fn(x,par[1:3],list(T=T)) + mycosh.fn(x,par[4:6],list(T=T))
+    mycosh.fn(x,par[1:num.par],list(T=T)) + mycosh.fn(x,par[(1:num.par) + num.par],list(T=T))
 
   dmycosh.two.states <- function( x, par )
-    cbind(dmycosh.fn(x,par[1:3],list(T=T)) , dmycosh.fn(x,par[4:6],list(T=T)) )
+    cbind(dmycosh.fn(x,par[1:num.par],list(T=T)) , dmycosh.fn(x,par[(1:num.par)+num.par],list(T=T)) )
 
 
 
@@ -168,7 +181,7 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
   
   
   fit.lm.two.states <- function( corr.data , t1.fit = t1.exc1 , t2.fit = T/2 , 
-                                par0 = c(  scf.res$lm.res$beta , rep( 0.1, length(data) ) , 1. ) )
+                                par0 = c(  scf.res$lm.res$beta ,  scf.res$lm.res$beta+0.5 ) )
     {
       
       range = corr.make.range( t1.fit , t2.fit )
@@ -189,8 +202,7 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
   ## initial set of parameters
 
   lm.res.two.states.i <- fit.lm.two.states(corr.all,t1.exc1 , T/2)
-  
-  
+
 
   if ( automatic.t1.exc1.adjust ) {
   
@@ -301,9 +313,12 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
   for( lei in 1:length(data) ) {
     predict.exc1 = mycosh( 0:(T/2) , ( lm.res.two.states$beta[par.range.exc1])[c(lei,length(data)+1)] , list(T=T) )
 
-    t1.opt[lei] = min( which(   predict.exc1 / dcorr[[lei]] < 1.0 ))-1
+    t1.opt[lei] = min( which(   ( predict.exc1 / dcorr[[lei]] < max.exc.state.contamin ) & ( 0:(T/2) > t1.exc1 ) ) )  - 1
   }
 
+  if( any( is.infinite(t1.opt) ) )
+    t1.opt[] = T/2-5
+  
   print( t1.opt )
 
 
