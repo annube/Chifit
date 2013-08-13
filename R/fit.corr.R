@@ -237,7 +237,7 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
 
   ## prepare table of boot strap sampled correlators
   
-  corr.all.boot <- array( NaN , dim=c( boot.R , (T/2 + 1 ) * length(data) ) )
+  corr.all.boot <- array( 0 , dim=c( boot.R , (T/2 + 1 ) * length(data) ) )
 
 
   for( lei in 1:length(data) ) {
@@ -400,7 +400,7 @@ fit.correlator <- function( data  , T ,t1 , t2 , t1.exc1 = round(t1/2), automati
 
 ##  return( lm.res.2 )
 
-  corr.all.range.boot <- array( NaN , dim=c( boot.R , length(range) * length(data) ) )
+  corr.all.range.boot <- array( 0 , dim=c( boot.R , length(range) * length(data) ) )
 
 
   for( lei in 1:length(data) ) {
