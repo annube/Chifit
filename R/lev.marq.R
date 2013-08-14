@@ -1,7 +1,7 @@
 
 
 
-lev.marq <- function( x,y,dy,fn,dfn,par.0,par.priors=par.0,priors.sigmas=rep(Inf,length(par.0)),upd.range,maxit=100,verbose=F ){
+lev.marq <- function( x,y,dy,fn,dfn,par.0,par.priors=par.0,priors.sigmas=rep(Inf,length(par.0)),upd.range,maxit=100,verbose=F,C.cov=NULL ){
 
 
   beta = par.0
@@ -11,14 +11,22 @@ lev.marq <- function( x,y,dy,fn,dfn,par.0,par.priors=par.0,priors.sigmas=rep(Inf
   nu = 2
 
   ## weight matrix
-  W <- diag(1/dy^2)
+  if( ! missing ( C.cov ) )
+      W = diagonal.precondition.solve (C.cov )
+  else
+      W <- diag(1/dy^2)
   
   res = y - fn(x,beta)
-  chisqr = sum( ( res/dy )^2 ) + sum((beta - par.priors)^2/priors.sigmas^2)
 
 
-  chisqr.fn <- function(par) sum( ((y - fn(x,par)) /dy )^2 ) + sum((par - par.priors)^2/priors.sigmas^2)
-  
+  chisqr.fn <- function(par) {
+      res = y - fn(x,par)
+      sum( ( ( res %*% W ) * res ) ) + sum((par - par.priors)^2/priors.sigmas^2)
+  }
+
+  chisqr = chisqr.fn(beta)
+
+      
   rel.diff = 1
 
 
@@ -44,7 +52,7 @@ lev.marq <- function( x,y,dy,fn,dfn,par.0,par.priors=par.0,priors.sigmas=rep(Inf
       next
     }
     if( verbose )  print(res.new)
-    chisqr.new = sum( ( res.new/dy )^2 ) + sum((beta.new - par.priors)^2/priors.sigmas^2)
+    chisqr.new = chisqr.fn( beta.new )
 
     if( chisqr.new < chisqr  ) {
       rel.diff = abs( 1-chisqr.new/chisqr )
